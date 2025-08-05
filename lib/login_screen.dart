@@ -4,6 +4,10 @@ import 'package:glassmorphism/glassmorphism.dart';
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
+  void _navigateToHome(BuildContext context) {
+    Navigator.pushNamed(context, '/home');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -11,151 +15,125 @@ class LoginScreen extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Mascot with Hero animation
-                Hero(
-                  tag: 'mascot',
-                  child: Image.asset(
-                    'assets/images/lexivo_bot.png',
-                    height: 120,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Welcome Text
-                const Text(
-                  "Welcome to Lexivo",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 30),
-
-                // Glassmorphic Card
-                GlassmorphicContainer(
-                  width: MediaQuery.of(context).size.width * 0.85,
-                  height: 330,
-                  borderRadius: 20,
-                  blur: 20,
-                  alignment: Alignment.center,
-                  border: 2,
-                  linearGradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacity(0.1),
-                      Colors.white.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderGradient: LinearGradient(
-                    colors: [
-                      Colors.greenAccent.withOpacity(0.4),
-                      Colors.cyanAccent.withOpacity(0.4),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0,
-                      vertical: 32,
-                    ),
-                    child: Column(
-                      children: [
-                        // Email
-                        TextField(
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            labelText: 'Email',
-                            labelStyle: const TextStyle(color: Colors.white70),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.1),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-
-                        // Password
-                        TextField(
-                          obscureText: true,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            labelText: 'Password',
-                            labelStyle: const TextStyle(color: Colors.white70),
-                            filled: true,
-                            fillColor: Colors.white.withOpacity(0.1),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-
-                        // Login Button
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.pushReplacementNamed(context, '/home');
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              gradient: const LinearGradient(
-                                colors: [Colors.greenAccent, Colors.cyanAccent],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Login',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Sign Up Link
-                Row(
+            padding: const EdgeInsets.all(20.0),
+            child: GlassmorphicContainer(
+              width: double.infinity,
+              height: 500,
+              borderRadius: 20,
+              blur: 15,
+              alignment: Alignment.center,
+              border: 2,
+              linearGradient: LinearGradient(
+                colors: [
+                  Colors.white.withOpacity(0.1),
+                  Colors.white38.withOpacity(0.05),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderGradient: LinearGradient(
+                colors: [Colors.white24, Colors.white10],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const SizedBox(height: 30),
                     const Text(
-                      "Don't have an account? ",
-                      style: TextStyle(color: Colors.white70),
+                      "Welcome Back",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
-                    GestureDetector(
-                      onTap: () {
+                    const SizedBox(height: 20),
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: "Email",
+                        hintStyle: const TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.white10,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        hintText: "Password",
+                        hintStyle: const TextStyle(color: Colors.white70),
+                        filled: true,
+                        fillColor: Colors.white10,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    const SizedBox(height: 30),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () => _navigateToHome(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00FF84),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        child: const Text(
+                          "Login",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => _navigateToHome(context),
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Colors.white30),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        icon: const Icon(
+                          Icons.g_mobiledata,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          "Continue with Google",
+                          style: TextStyle(fontSize: 16, color: Colors.white70),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextButton(
+                      onPressed: () {
                         Navigator.pushNamed(context, '/signup');
                       },
                       child: const Text(
-                        'Sign Up',
-                        style: TextStyle(
-                          color: Colors.greenAccent,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        "Don’t have an account? Sign Up",
+                        style: TextStyle(color: Colors.white54),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 30),
-              ],
+              ),
             ),
           ),
         ),
