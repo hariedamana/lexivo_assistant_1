@@ -1,6 +1,25 @@
 import 'package:flutter/material.dart';
 
-class AssistantsDashboard extends StatelessWidget {
+class AssistantsDashboard extends StatefulWidget {
+  const AssistantsDashboard({super.key});
+
+  @override
+  State<AssistantsDashboard> createState() => _AssistantsDashboardState();
+}
+
+class _AssistantsDashboardState extends State<AssistantsDashboard> {
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) {
+    if (index == 0) {
+      Navigator.pushNamed(context, '/home');
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
+
   final List<Map<String, dynamic>> assistants = [
     {'name': 'Text-to-Speech', 'icon': Icons.record_voice_over},
     {'name': 'Simplify', 'icon': Icons.auto_fix_high},
@@ -20,7 +39,10 @@ class AssistantsDashboard extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
-        title: Text('Smart Assistants', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Smart Assistants',
+          style: TextStyle(color: Colors.white),
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -29,11 +51,11 @@ class AssistantsDashboard extends StatelessWidget {
           children: [
             // Search Bar
             TextField(
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search for an assistant...',
-                hintStyle: TextStyle(color: Colors.white54),
-                prefixIcon: Icon(Icons.search, color: Colors.white),
+                hintStyle: const TextStyle(color: Colors.white54),
+                prefixIcon: const Icon(Icons.search, color: Colors.white),
                 filled: true,
                 fillColor: Colors.grey[900],
                 border: OutlineInputBorder(
@@ -42,24 +64,24 @@ class AssistantsDashboard extends StatelessWidget {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Subtitle
-            Align(
+            const Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'Tap an assistant to get started',
                 style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
             // Assistants Grid
             Expanded(
               child: GridView.builder(
                 itemCount: assistants.length,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, // 2 columns
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
                   childAspectRatio: 1.2,
@@ -68,7 +90,6 @@ class AssistantsDashboard extends StatelessWidget {
                   final assistant = assistants[index];
                   return GestureDetector(
                     onTap: () {
-                      // You can later add navigation to specific pages
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text('${assistant['name']} clicked')),
                       );
@@ -86,11 +107,11 @@ class AssistantsDashboard extends StatelessWidget {
                             color: Colors.greenAccent,
                             size: 40,
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           Text(
                             assistant['name'],
                             textAlign: TextAlign.center,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Colors.greenAccent,
                               fontWeight: FontWeight.bold,
                             ),
@@ -105,19 +126,23 @@ class AssistantsDashboard extends StatelessWidget {
           ],
         ),
       ),
-      // Optional: Bottom Nav
+
+      // Matching Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         backgroundColor: Colors.black,
         selectedItemColor: Colors.greenAccent,
-        unselectedItemColor: Colors.white54,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ''),
           BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view),
-            label: 'Assistants',
+            icon: Icon(Icons.chat_bubble_outline),
+            label: '',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
         ],
       ),
     );

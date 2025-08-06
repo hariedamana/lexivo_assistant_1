@@ -1,27 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-void main() {
-  runApp(
-    const MaterialApp(home: HomeScreen(), debugShowCheckedModeBanner: false),
-  );
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    if (index == 1) {
+      // Navigate to AssistantsDashboard page
+      Navigator.pushNamed(context, '/assistants');
+    } else {
+      setState(() {
+        _selectedIndex = index;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         backgroundColor: Colors.black,
         selectedItemColor: Colors.greenAccent,
         unselectedItemColor: Colors.grey,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.textsms_rounded), label: ''),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.grid_view),
+            label: '',
+          ), // Changed here
           BottomNavigationBarItem(
             icon: Icon(Icons.chat_bubble_outline),
             label: '',
@@ -240,10 +257,9 @@ class RecentCard extends StatelessWidget {
   }
 }
 
-// Placeholder pages for each assistant
+// Placeholder assistant pages
 class TextToSpeechPage extends StatelessWidget {
   const TextToSpeechPage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return const AssistantScaffold(
@@ -255,7 +271,6 @@ class TextToSpeechPage extends StatelessWidget {
 
 class SimplifyPage extends StatelessWidget {
   const SimplifyPage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return const AssistantScaffold(
@@ -267,7 +282,6 @@ class SimplifyPage extends StatelessWidget {
 
 class LexiTypePage extends StatelessWidget {
   const LexiTypePage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return const AssistantScaffold(
@@ -279,7 +293,6 @@ class LexiTypePage extends StatelessWidget {
 
 class CorrectMePage extends StatelessWidget {
   const CorrectMePage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return const AssistantScaffold(
@@ -291,7 +304,6 @@ class CorrectMePage extends StatelessWidget {
 
 class AssistantsPage extends StatelessWidget {
   const AssistantsPage({super.key});
-
   @override
   Widget build(BuildContext context) {
     return const AssistantScaffold(
@@ -301,7 +313,7 @@ class AssistantsPage extends StatelessWidget {
   }
 }
 
-// Reusable Scaffold Widget for assistant pages
+// Shared scaffold widget
 class AssistantScaffold extends StatelessWidget {
   final String title;
   final String message;
