@@ -3,7 +3,8 @@ import 'splash_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
-import 'assistants_dashboard.dart'; // <-- Import this
+import 'assistants_dashboard.dart';
+import 'chat_screen.dart'; // <-- Import Chat Screen
 
 void main() {
   runApp(const LexivoApp());
@@ -23,7 +24,8 @@ class LexivoApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/home': (context) => const HomeScreen(),
-        '/assistants': (context) => AssistantsDashboard(), // <-- Add this
+        '/assistants': (context) => AssistantsDashboard(),
+        '/chat': (context) => const ChatbotScreen(), // <-- Add this route
       },
     );
   }

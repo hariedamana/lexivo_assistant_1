@@ -13,8 +13,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _onItemTapped(int index) {
     if (index == 1) {
-      // Navigate to AssistantsDashboard page
       Navigator.pushNamed(context, '/assistants');
+    } else if (index == 2) {
+      Navigator.pushNamed(context, '/chat'); // ✅ Navigate to Chat
     } else {
       setState(() {
         _selectedIndex = index;
@@ -35,10 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view),
-            label: '',
-          ), // Changed here
+          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ''),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat_bubble_outline),
             label: '',
