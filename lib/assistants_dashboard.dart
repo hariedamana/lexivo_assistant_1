@@ -13,6 +13,8 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
   void _onItemTapped(int index) {
     if (index == 0) {
       Navigator.pushNamed(context, '/home');
+    } else if (index == 2) {
+      Navigator.pushNamed(context, '/chat'); // <-- Navigate to Chatbot
     } else {
       setState(() {
         _selectedIndex = index;
