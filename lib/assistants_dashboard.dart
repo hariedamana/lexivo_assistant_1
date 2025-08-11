@@ -9,12 +9,15 @@ class AssistantsDashboard extends StatefulWidget {
 
 class _AssistantsDashboardState extends State<AssistantsDashboard> {
   int _selectedIndex = 1;
+  String _searchQuery = '';
 
   void _onItemTapped(int index) {
     if (index == 0) {
       Navigator.pushNamed(context, '/home');
     } else if (index == 2) {
-      Navigator.pushNamed(context, '/chat'); // <-- Navigate to Chatbot
+      Navigator.pushNamed(context, '/chat');
+    } else if (index == 3) {
+      Navigator.pushNamed(context, '/profile');
     } else {
       setState(() {
         _selectedIndex = index;
@@ -23,129 +26,470 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
   }
 
   final List<Map<String, dynamic>> assistants = [
-    {'name': 'Text-to-Speech', 'icon': Icons.record_voice_over},
-    {'name': 'Simplify', 'icon': Icons.auto_fix_high},
-    {'name': 'LexiType', 'icon': Icons.keyboard_alt},
-    {'name': 'Dictionary', 'icon': Icons.menu_book},
-    {'name': 'PDF/Doc Reader', 'icon': Icons.picture_as_pdf},
-    {'name': 'Word Coach', 'icon': Icons.school},
-    {'name': 'Speak To Type', 'icon': Icons.mic},
-    {'name': 'Correct Me', 'icon': Icons.spellcheck},
-    {'name': 'Read Along', 'icon': Icons.chrome_reader_mode},
+    {
+      'name': 'Text-to-Speech',
+      'icon': Icons.record_voice_over_rounded,
+      'color': Color(0xFF00E5A0),
+      'category': 'Voice'
+    },
+    {
+      'name': 'Simplify',
+      'icon': Icons.auto_fix_high_rounded,
+      'color': Color(0xFF6366F1),
+      'category': 'Text'
+    },
+    {
+      'name': 'LexiType',
+      'icon': Icons.keyboard_alt_rounded,
+      'color': Color(0xFFEC4899),
+      'category': 'Typing'
+    },
+    {
+      'name': 'Dictionary',
+      'icon': Icons.menu_book_rounded,
+      'color': Color(0xFFF59E0B),
+      'category': 'Reference'
+    },
+    {
+      'name': 'PDF/Doc Reader',
+      'icon': Icons.picture_as_pdf_rounded,
+      'color': Color(0xFFEF4444),
+      'category': 'Documents'
+    },
+    {
+      'name': 'Word Coach',
+      'icon': Icons.school_rounded,
+      'color': Color(0xFF8B5CF6),
+      'category': 'Learning'
+    },
+    {
+      'name': 'Speak To Type',
+      'icon': Icons.mic_rounded,
+      'color': Color(0xFF06B6D4),
+      'category': 'Voice'
+    },
+    {
+      'name': 'Correct Me',
+      'icon': Icons.spellcheck_rounded,
+      'color': Color(0xFF10B981),
+      'category': 'Grammar'
+    },
+    {
+      'name': 'Read Along',
+      'icon': Icons.chrome_reader_mode_rounded,
+      'color': Color(0xFFEAB308),
+      'category': 'Reading'
+    },
   ];
+
+  List<Map<String, dynamic>> get filteredAssistants {
+    if (_searchQuery.isEmpty) return assistants;
+    return assistants
+        .where((assistant) =>
+            assistant['name'].toLowerCase().contains(_searchQuery.toLowerCase()))
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        elevation: 0,
-        title: const Text(
-          'Smart Assistants',
-          style: TextStyle(color: Colors.white),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+      backgroundColor: const Color(0xFF0A0E1A),
+      body: SafeArea(
         child: Column(
           children: [
-            // Search Bar
-            TextField(
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                hintText: 'Search for an assistant...',
-                hintStyle: const TextStyle(color: Colors.white54),
-                prefixIcon: const Icon(Icons.search, color: Colors.white),
-                filled: true,
-                fillColor: Colors.grey[900],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Subtitle
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Tap an assistant to get started',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Assistants Grid
-            Expanded(
-              child: GridView.builder(
-                itemCount: assistants.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.2,
-                ),
-                itemBuilder: (context, index) {
-                  final assistant = assistants[index];
-                  return GestureDetector(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${assistant['name']} clicked')),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.grey[900],
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            assistant['icon'],
-                            color: Colors.greenAccent,
-                            size: 40,
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            assistant['name'],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Colors.greenAccent,
-                              fontWeight: FontWeight.bold,
+            // Fixed Header Section
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header Row
+                  Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1C1F2B),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: const Color(0xFF00E5A0).withOpacity(0.2),
                             ),
                           ),
-                        ],
+                          child: const Icon(
+                            Icons.arrow_back_ios_rounded,
+                            color: Color(0xFF00E5A0),
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Text(
+                          'Smart Assistants',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF1C1F2B),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: const Color(0xFF00E5A0).withOpacity(0.2),
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.tune_rounded,
+                          color: Color(0xFF00E5A0),
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Search Bar
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1C1F2B),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF00E5A0).withOpacity(0.1),
                       ),
                     ),
-                  );
-                },
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.search_rounded,
+                          color: Color(0xFF00E5A0),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                            },
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: "Search assistants...",
+                              hintStyle: TextStyle(
+                                color: Color(0xFF6B7280),
+                                fontSize: 15,
+                              ),
+                              border: InputBorder.none,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ),
+                        if (_searchQuery.isNotEmpty)
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _searchQuery = '';
+                              });
+                            },
+                            child: const Icon(
+                              Icons.close_rounded,
+                              color: Color(0xFF6B7280),
+                              size: 18,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Stats Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _searchQuery.isEmpty
+                            ? '${assistants.length} assistants available'
+                            : '${filteredAssistants.length} results found',
+                        style: const TextStyle(
+                          color: Color(0xFF6B7280),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00E5A0).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: const Color(0xFF00E5A0).withOpacity(0.2),
+                          ),
+                        ),
+                        child: const Text(
+                          'All Active',
+                          style: TextStyle(
+                            color: Color(0xFF00E5A0),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
+
+            // Assistants Grid - Scrollable
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: GridView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: filteredAssistants.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 14,
+                    crossAxisSpacing: 14,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemBuilder: (context, index) {
+                    final assistant = filteredAssistants[index];
+                    return ImprovedAssistantCard(
+                      name: assistant['name'],
+                      icon: assistant['icon'],
+                      color: assistant['color'],
+                      category: assistant['category'],
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${assistant['name']} activated'),
+                            backgroundColor: assistant['color'],
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.all(20),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),
 
-      // Matching Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.greenAccent,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ''),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: '',
+      // Floating Bottom Navigation
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C1F2B),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              offset: const Offset(0, 4),
+              blurRadius: 20,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            backgroundColor: Colors.transparent,
+            selectedItemColor: const Color(0xFF00E5A0),
+            unselectedItemColor: const Color(0xFF6B7280),
+            type: BottomNavigationBarType.fixed,
+            elevation: 0,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home_rounded, size: 24),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.apps_rounded, size: 24),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat_bubble_rounded, size: 24),
+                label: '',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.person_rounded, size: 24),
+                label: '',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class ImprovedAssistantCard extends StatelessWidget {
+  final String name;
+  final IconData icon;
+  final Color color;
+  final String category;
+  final VoidCallback onTap;
+
+  const ImprovedAssistantCard({
+    super.key,
+    required this.name,
+    required this.icon,
+    required this.color,
+    required this.category,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C1F2B),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: color.withOpacity(0.15),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              offset: const Offset(0, 2),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top section with icon
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        color.withOpacity(0.2),
+                        color.withOpacity(0.1),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: color,
+                    size: 24,
+                  ),
+                ),
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ],
+            ),
+
+            // Middle section with name
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    category,
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            // Bottom section with action
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Ready',
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: color,
+                  size: 14,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

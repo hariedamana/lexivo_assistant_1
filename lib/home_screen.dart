@@ -15,7 +15,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (index == 1) {
       Navigator.pushNamed(context, '/assistants');
     } else if (index == 2) {
-      Navigator.pushNamed(context, '/chat'); // ✅ Navigate to Chat
+      Navigator.pushNamed(context, '/chat');
+    } else if (index == 3) {
+      Navigator.pushNamed(context, '/profile');
     } else {
       setState(() {
         _selectedIndex = index;
@@ -26,145 +28,391 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        backgroundColor: Colors.black,
-        selectedItemColor: Colors.greenAccent,
-        unselectedItemColor: Colors.grey,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.grid_view), label: ''),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_outline),
-            label: '',
+      backgroundColor: const Color(0xFF0A0E1A), // Deep dark background
+      bottomNavigationBar: Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1C1F2B),
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              offset: const Offset(0, 4),
+              blurRadius: 20,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(25),
+          child: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            backgroundColor: Colors.transparent,
+            selectedItemColor: const Color(0xFF00E5A0), // Bright teal
+            unselectedItemColor: const Color(0xFF6B7280),
+            type: BottomNavigationBarType.fixed,
+            elevation: 0,
+            showSelectedLabels: false,
+            showUnselectedLabels: false,
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home_rounded, size: 26), label: ''),
+              BottomNavigationBarItem(icon: Icon(Icons.apps_rounded, size: 26), label: ''),
+              BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded, size: 26), label: ''),
+              BottomNavigationBarItem(icon: Icon(Icons.person_rounded, size: 26), label: ''),
+            ],
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-        ],
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Search Bar
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: Colors.grey[900],
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: Row(
-                  children: const [
-                    Icon(Icons.search, color: Colors.grey),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: "Start typing... I've got your back!",
-                          hintStyle: TextStyle(color: Colors.grey),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
 
-              // Mascot and Progress in Rectangular Box
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[900],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                // Header Section with modern styling
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Image.asset('assets/images/lexivo_bot.png', height: 90),
-                    CircularPercentIndicator(
-                      radius: 45.0,
-                      lineWidth: 6.0,
-                      percent: 0.75,
-                      animation: true,
-                      animationDuration: 1200,
-                      center: const Text(
-                        "75%\nCompleted",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Hey, Hari!',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 32,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            DateTime.now().toString().substring(0, 10),
+                            style: const TextStyle(
+                              color: Color(0xFF6B7280),
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                      progressColor: Colors.greenAccent,
-                      backgroundColor: Colors.grey.shade800,
-                      circularStrokeCap: CircularStrokeCap.round,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1C1F2B),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: const Color(0xFF00E5A0).withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.notifications_outlined,
+                        color: Color(0xFF00E5A0),
+                        size: 24,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 20),
 
-              const Text(
-                "Assistants",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                const SizedBox(height: 32),
+
+                // Enhanced Search Bar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1C1F2B),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF00E5A0).withOpacity(0.1),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF00E5A0).withOpacity(0.05),
+                        offset: const Offset(0, 4),
+                        blurRadius: 20,
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: const [
+                      Icon(Icons.search_rounded, color: Color(0xFF00E5A0), size: 24),
+                      SizedBox(width: 16),
+                      Expanded(
+                        child: TextField(
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: "Start typing... I've got your back!",
+                            hintStyle: TextStyle(
+                              color: Color(0xFF6B7280),
+                              fontSize: 16,
+                            ),
+                            border: InputBorder.none,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
 
-              // Assistant Grid
-              GridView.count(
-                shrinkWrap: true,
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                physics: const NeverScrollableScrollPhysics(),
-                children: const [
-                  AssistantTile(
-                    icon: Icons.record_voice_over,
-                    title: 'Text-to-Speech',
-                  ),
-                  AssistantTile(
-                    icon: Icons.tips_and_updates,
-                    title: 'Simplify',
-                  ),
-                  AssistantTile(icon: Icons.keyboard_alt, title: 'LexiType'),
-                  AssistantTile(
-                    icon: Icons.fact_check_outlined,
-                    title: 'Correct Me',
-                  ),
-                ],
-              ),
+                const SizedBox(height: 32),
 
-              const SizedBox(height: 25),
-              const Text(
-                "Recent Activities",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                // Progress Card with financial app styling
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        const Color(0xFF00E5A0),
+                        const Color(0xFF00C4CC),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF00E5A0).withOpacity(0.3),
+                        offset: const Offset(0, 8),
+                        blurRadius: 32,
+                        spreadRadius: 0,
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Image.asset(
+                              'assets/images/lexivo_bot.png',
+                              height: 32,
+                              width: 32,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(Icons.android, color: Colors.white, size: 32),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'Learning Progress',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Keep it up!',
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                'Completed',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                '75%',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                          CircularPercentIndicator(
+                            radius: 40.0,
+                            lineWidth: 8.0,
+                            percent: 0.75,
+                            animation: true,
+                            animationDuration: 1200,
+                            center: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.trending_up,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ),
+                            progressColor: Colors.white,
+                            backgroundColor: Colors.white.withOpacity(0.2),
+                            circularStrokeCap: CircularStrokeCap.round,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
 
-              const RecentCard(icon: Icons.people, title: "In Progress"),
-              const SizedBox(height: 10),
-              const RecentCard(
-                icon: Icons.history_toggle_off,
-                title: "Last Used",
-              ),
-              const SizedBox(height: 10),
-              const RecentCard(icon: Icons.lightbulb_outline, title: "Updated"),
-              const SizedBox(height: 30),
-            ],
+                const SizedBox(height: 40),
+
+                // Section Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Assistants',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF00E5A0).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFF00E5A0).withOpacity(0.2),
+                        ),
+                      ),
+                      child: const Text(
+                        'View All',
+                        style: TextStyle(
+                          color: Color(0xFF00E5A0),
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Assistant Grid
+                GridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  physics: const NeverScrollableScrollPhysics(),
+                  childAspectRatio: 0.85,
+                  children: const [
+                    FinancialAssistantTile(
+                      icon: Icons.record_voice_over_rounded,
+                      title: 'Text-to-Speech',
+                      subtitle: 'Voice Assistant',
+                      color: Color(0xFF00E5A0),
+                    ),
+                    FinancialAssistantTile(
+                      icon: Icons.tips_and_updates_rounded,
+                      title: 'Simplify',
+                      subtitle: 'Text Helper',
+                      color: Color(0xFF6366F1),
+                    ),
+                    FinancialAssistantTile(
+                      icon: Icons.keyboard_alt_rounded,
+                      title: 'LexiType',
+                      subtitle: 'Smart Typing',
+                      color: Color(0xFFEC4899),
+                    ),
+                    FinancialAssistantTile(
+                      icon: Icons.fact_check_outlined,
+                      title: 'Correct Me',
+                      subtitle: 'Grammar Check',
+                      color: Color(0xFFF59E0B),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 40),
+
+                // Recent Activities Section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Recent Activities',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.more_horiz,
+                      color: Color(0xFF6B7280),
+                      size: 24,
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                const FinancialRecentCard(
+                  icon: Icons.people_rounded,
+                  title: "In Progress",
+                  subtitle: "3 active sessions",
+                  amount: "Active",
+                  color: Color(0xFF00E5A0),
+                ),
+                const SizedBox(height: 16),
+                const FinancialRecentCard(
+                  icon: Icons.history_rounded,
+                  title: "Last Used",
+                  subtitle: "Text-to-Speech • 2 hours ago",
+                  amount: "2h ago",
+                  color: Color(0xFF6366F1),
+                ),
+                const SizedBox(height: 16),
+                const FinancialRecentCard(
+                  icon: Icons.lightbulb_outline_rounded,
+                  title: "Updated",
+                  subtitle: "New features available",
+                  amount: "New",
+                  color: Color(0xFFEC4899),
+                ),
+
+                const SizedBox(height: 100), // Extra space for bottom navigation
+              ],
+            ),
           ),
         ),
       ),
@@ -172,18 +420,25 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class AssistantTile extends StatelessWidget {
+class FinancialAssistantTile extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String subtitle;
+  final Color color;
 
-  const AssistantTile({super.key, required this.icon, required this.title});
+  const FinancialAssistantTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
         Widget targetPage;
-
         switch (title) {
           case 'Text-to-Speech':
             targetPage = const TextToSpeechPage();
@@ -200,27 +455,94 @@ class AssistantTile extends StatelessWidget {
           default:
             targetPage = const AssistantsPage();
         }
-
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => targetPage),
         );
       },
       child: Container(
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.grey[900],
-          borderRadius: BorderRadius.circular(12),
+          color: const Color(0xFF1C1F2B),
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: color.withOpacity(0.1),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              offset: const Offset(0, 4),
+              blurRadius: 20,
+            ),
+          ],
         ),
-        padding: const EdgeInsets.all(18),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 28, color: Colors.greenAccent),
-            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    color.withOpacity(0.2),
+                    color.withOpacity(0.1),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 28,
+              ),
+            ),
+            const Spacer(),
             Text(
               title,
-              style: const TextStyle(color: Colors.greenAccent),
-              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                color: Color(0xFF6B7280),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    'Active',
+                    style: TextStyle(
+                      color: color,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: color,
+                  size: 16,
+                ),
+              ],
             ),
           ],
         ),
@@ -229,33 +551,121 @@ class AssistantTile extends StatelessWidget {
   }
 }
 
-class RecentCard extends StatelessWidget {
+class FinancialRecentCard extends StatelessWidget {
   final IconData icon;
   final String title;
+  final String subtitle;
+  final String amount;
+  final Color color;
 
-  const RecentCard({super.key, required this.icon, required this.title});
+  const FinancialRecentCard({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.amount,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 55,
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[850],
-        borderRadius: BorderRadius.circular(10),
+        color: const Color(0xFF1C1F2B),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: color.withOpacity(0.1),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 10,
+          ),
+        ],
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
-          Icon(icon, color: Colors.greenAccent),
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  color.withOpacity(0.2),
+                  color.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
+            ),
+          ),
           const SizedBox(width: 16),
-          Text(title, style: const TextStyle(color: Colors.white)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    color: Color(0xFF6B7280),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  amount,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: color,
+                size: 16,
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
 }
 
-// Placeholder assistant pages
+// Placeholder assistant pages (keeping your existing ones)
 class TextToSpeechPage extends StatelessWidget {
   const TextToSpeechPage({super.key});
   @override
@@ -311,7 +721,7 @@ class AssistantsPage extends StatelessWidget {
   }
 }
 
-// Shared scaffold widget
+// Updated shared scaffold widget
 class AssistantScaffold extends StatelessWidget {
   final String title;
   final String message;
@@ -325,16 +735,17 @@ class AssistantScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF0A0E1A),
       appBar: AppBar(
         title: Text(title),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: const Color(0xFF1C1F2B),
+        foregroundColor: const Color(0xFF00E5A0),
+        elevation: 0,
       ),
       body: Center(
         child: Text(
           message,
-          style: const TextStyle(color: Colors.greenAccent, fontSize: 18),
+          style: const TextStyle(color: Color(0xFF00E5A0), fontSize: 18),
         ),
       ),
     );

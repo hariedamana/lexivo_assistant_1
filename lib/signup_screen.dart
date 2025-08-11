@@ -1,107 +1,84 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:glassmorphism/glassmorphism.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    const Color accentStart = Color(0xFF00FF84);
+    const Color accentEnd = Color(0xFF00FFE5);
+    const borderColor = Colors.white24;
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF0C2D21),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                const Text(
-                  'Sign Up',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Join Lexivo and simplify learning.',
-                  style: TextStyle(color: Colors.white70),
-                ),
-                const SizedBox(height: 40),
-
-                // Glassmorphic Container
-                GlassmorphicContainer(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(24),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+                child: Container(
                   width: double.infinity,
-                  height: 460,
-                  borderRadius: 20,
-                  blur: 15,
-                  alignment: Alignment.center,
-                  border: 2,
-                  linearGradient: LinearGradient(
-                    colors: [
-                      Colors.white.withOpacity(0.1),
-                      Colors.white.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderGradient: LinearGradient(
-                    colors: [
-                      Colors.green.withOpacity(0.5),
-                      Colors.cyan.withOpacity(0.5),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 30,
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: borderColor),
+                    gradient: LinearGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.06),
+                        Colors.white.withOpacity(0.02),
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    child: Column(
-                      children: [
-                        const Text(
-                          "Create Account",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Sign Up',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                        const SizedBox(height: 20),
+                      ),
+                      const SizedBox(height: 6),
+                      const Text(
+                        'Join Lexivo and simplify learning.',
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                      const SizedBox(height: 30),
 
-                        // Name Field
-                        _buildTextField(Icons.person, "Name"),
-                        const SizedBox(height: 16),
+                      _glassInputField(icon: Icons.person, hintText: "Name"),
+                      const SizedBox(height: 16),
+                      _glassInputField(icon: Icons.email, hintText: "Email"),
+                      const SizedBox(height: 16),
+                      _glassInputField(
+                        icon: Icons.lock,
+                        hintText: "Password",
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 16),
+                      _glassInputField(
+                        icon: Icons.lock,
+                        hintText: "Confirm Password",
+                        obscureText: true,
+                      ),
+                      const SizedBox(height: 30),
 
-                        // Email Field
-                        _buildTextField(Icons.email, "Email"),
-                        const SizedBox(height: 16),
-
-                        // Password Field
-                        _buildTextField(
-                          Icons.lock,
-                          "Password",
-                          obscureText: true,
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Confirm Password Field
-                        _buildTextField(
-                          Icons.lock,
-                          "Confirm Password",
-                          obscureText: true,
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Create Account Button
-                        Container(
-                          width: double.infinity,
-                          height: 50,
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: DecoratedBox(
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
                             gradient: const LinearGradient(
-                              colors: [Color(0xFF00FF84), Color(0xFF00FFE5)],
+                              colors: [accentStart, accentEnd],
                             ),
+                            borderRadius: BorderRadius.circular(14),
                           ),
                           child: ElevatedButton(
                             onPressed: () {
@@ -111,61 +88,57 @@ class SignUpScreen extends StatelessWidget {
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(14),
                               ),
                             ),
                             child: const Text(
                               "Create Account",
                               style: TextStyle(
+                                color: Colors.black,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
-                                color: Colors.white,
                               ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton.icon(
+                          onPressed: () {},
+                          icon: const Icon(Icons.g_mobiledata, color: Colors.white),
+                          label: const Text(
+                            "Continue with Google",
+                            style: TextStyle(color: Colors.white70, fontSize: 16),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Colors.white30),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 14),
+
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, '/login');
+                        },
+                        child: const Text(
+                          "Already have an account? Login",
+                          style: TextStyle(color: Colors.white54),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-
-                const SizedBox(height: 20),
-
-                // Google Button
-                Container(
-                  width: double.infinity,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.white10,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: TextButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.g_mobiledata,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                    label: const Text(
-                      "Continue with Google",
-                      style: TextStyle(color: Colors.white, fontSize: 15),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Login redirect
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/login');
-                  },
-                  child: const Text(
-                    "Already have an account? Login",
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -173,10 +146,9 @@ class SignUpScreen extends StatelessWidget {
     );
   }
 
-  // Custom TextField Widget
-  Widget _buildTextField(
-    IconData icon,
-    String hintText, {
+  Widget _glassInputField({
+    required IconData icon,
+    required String hintText,
     bool obscureText = false,
   }) {
     return TextField(
@@ -185,16 +157,21 @@ class SignUpScreen extends StatelessWidget {
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: const Color(0xFF00FF84)),
         hintText: hintText,
-        hintStyle: const TextStyle(color: Colors.white60),
+        hintStyle: const TextStyle(color: Colors.white54),
         filled: true,
-        fillColor: Colors.transparent,
+        fillColor: Colors.white.withOpacity(0.05),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
         enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Color(0xFF00FF84)),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.white24),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.cyanAccent),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.cyanAccent.shade100),
         ),
       ),
     );
