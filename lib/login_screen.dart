@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -14,7 +15,6 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _isLoading = false;
 
-  // Professional color palette from reference
   static const Color primaryTeal = Color(0xFF00D4AA);
   static const Color darkBackground = Color(0xFF0A0E27);
   static const Color cardBackground = Color(0xFF1A1E3A);
@@ -30,13 +30,57 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _navigateToHome(BuildContext context) async {
+  void _loginUser() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(milliseconds: 600));
-    
-    if (mounted) {
-      Navigator.pushNamed(context, '/home');
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter email and password")),
+      );
       setState(() => _isLoading = false);
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+
+      switch (e.code) {
+        case 'user-not-found':
+          errorMessage = 'No user found for that email.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password.';
+          break;
+        case 'invalid-email':
+          errorMessage = 'Invalid email format.';
+          break;
+        default:
+          errorMessage = 'Login failed: ${e.message}';
+          break;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Something went wrong.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -47,10 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Stack(
           children: [
-            // Minimal background pattern
             _buildMinimalBackground(),
-            
-            // Main content
             Center(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -94,32 +135,16 @@ class _LoginScreenState extends State<LoginScreen> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Minimal header
           _buildMinimalHeader(),
-          
           const SizedBox(height: 32),
-          
-          // Clean input fields
           _buildCleanInputs(),
-          
           const SizedBox(height: 28),
-          
-          // Primary action button
           _buildPrimaryButton(),
-          
           const SizedBox(height: 20),
-          
-          // Minimal divider
           _buildMinimalDivider(),
-          
           const SizedBox(height: 20),
-          
-          // Social buttons
           _buildSocialButtons(),
-          
           const SizedBox(height: 24),
-          
-          // Bottom link
           _buildBottomLink(),
         ],
       ),
@@ -130,7 +155,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Clean back button
         Container(
           width: 40,
           height: 40,
@@ -140,18 +164,11 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           child: IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: textPrimary,
-              size: 16,
-            ),
+            icon: const Icon(Icons.arrow_back_ios_new, color: textPrimary, size: 16),
             padding: EdgeInsets.zero,
           ),
         ),
-        
         const SizedBox(height: 24),
-        
-        // Clean title
         const Text(
           "Login",
           style: TextStyle(
@@ -161,10 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
             letterSpacing: -0.5,
           ),
         ),
-        
         const SizedBox(height: 6),
-        
-        // Minimal subtitle
         Text(
           "Enter your Email and Password.",
           style: TextStyle(
@@ -180,16 +194,12 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildCleanInputs() {
     return Column(
       children: [
-        // Email/Phone input
         _buildCleanInputField(
           controller: _emailController,
-          hintText: "Phone number",
-          keyboardType: TextInputType.phone,
+          hintText: "Email",
+          keyboardType: TextInputType.emailAddress,
         ),
-        
         const SizedBox(height: 16),
-        
-        // Password input
         _buildCleanInputField(
           controller: _passwordController,
           hintText: "Password",
@@ -227,26 +237,17 @@ class _LoginScreenState extends State<LoginScreen> {
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
-        style: const TextStyle(
-          color: textPrimary,
-          fontSize: 16,
-        ),
+        style: const TextStyle(color: textPrimary, fontSize: 16),
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(
             color: textSecondary.withOpacity(0.6),
             fontSize: 16,
           ),
-          suffixIcon: suffixIcon != null 
-              ? Padding(
-                  padding: const EdgeInsets.only(right: 12),
-                  child: suffixIcon,
-                )
+          suffixIcon: suffixIcon != null
+              ? Padding(padding: const EdgeInsets.only(right: 12), child: suffixIcon)
               : null,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 18,
-          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
@@ -272,7 +273,7 @@ class _LoginScreenState extends State<LoginScreen> {
           color: primaryTeal,
         ),
         child: ElevatedButton(
-          onPressed: _isLoading ? null : () => _navigateToHome(context),
+          onPressed: _isLoading ? null : _loginUser,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
@@ -307,12 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildMinimalDivider() {
     return Row(
       children: [
-        Expanded(
-          child: Container(
-            height: 1,
-            color: borderColor.withOpacity(0.3),
-          ),
-        ),
+        Expanded(child: Container(height: 1, color: borderColor.withOpacity(0.3))),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
@@ -323,12 +319,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-        Expanded(
-          child: Container(
-            height: 1,
-            color: borderColor.withOpacity(0.3),
-          ),
-        ),
+        Expanded(child: Container(height: 1, color: borderColor.withOpacity(0.3))),
       ],
     );
   }
@@ -336,18 +327,18 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _buildSocialButtons() {
     return Column(
       children: [
-        // Google button
         _buildSocialButton(
-          onPressed: () => _navigateToHome(context),
+          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Google Sign-In not yet implemented.')),
+          ),
           icon: Icons.g_mobiledata,
           label: "Sign in with Google",
         ),
-        
         const SizedBox(height: 12),
-        
-        // Apple button
         _buildSocialButton(
-          onPressed: () => _navigateToHome(context),
+          onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Apple Sign-In not yet implemented.')),
+          ),
           icon: Icons.apple,
           label: "Sign in with Apple",
         ),
@@ -365,10 +356,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: borderColor.withOpacity(0.4),
-            width: 1,
-          ),
+          border: Border.all(color: borderColor.withOpacity(0.4), width: 1),
           color: inputBackground.withOpacity(0.3),
         ),
         child: OutlinedButton.icon(
@@ -424,10 +412,8 @@ class _LoginScreenState extends State<LoginScreen> {
 class MinimalBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..strokeWidth = 0.5;
+    final paint = Paint()..strokeWidth = 0.5;
 
-    // Very subtle diagonal lines
     paint.color = const Color(0xFF00D4AA).withOpacity(0.03);
     for (int i = 0; i < 20; i++) {
       final startX = (i * 40.0) - 100;
@@ -438,16 +424,15 @@ class MinimalBackgroundPainter extends CustomPainter {
       );
     }
 
-    // Minimal floating elements
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 0.8;
-    
+
     canvas.drawCircle(
       Offset(size.width * 0.1, size.height * 0.15),
       30,
       paint..color = const Color(0xFF00D4AA).withOpacity(0.05),
     );
-    
+
     canvas.drawCircle(
       Offset(size.width * 0.9, size.height * 0.85),
       20,

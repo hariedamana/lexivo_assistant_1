@@ -1,15 +1,97 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-class SignUpScreen extends StatelessWidget {
+// Firebase packages
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    const Color accentStart = Color(0xFF00FF84);
-    const Color accentEnd = Color(0xFF00FFE5);
-    const borderColor = Colors.white24;
+  State<SignUpScreen> createState() => _SignUpScreenState();
+}
 
+class _SignUpScreenState extends State<SignUpScreen> {
+  // Controllers to read user inputs
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  // Colors used in UI
+  static const Color accentStart = Color(0xFF00FF84);
+  static const Color accentEnd = Color(0xFF00FFE5);
+  static const borderColor = Colors.white24;
+
+  @override
+  void dispose() {
+    // Dispose controllers to free memory
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  // Method to create account using Firebase Auth and Firestore
+  Future<void> _createAccount() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    final confirmPassword = _confirmPasswordController.text;
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+      setState(() => _errorMessage = 'Please fill all fields.');
+      return;
+    }
+
+    if (password != confirmPassword) {
+      setState(() => _errorMessage = 'Passwords do not match.');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // Create user in Firebase Auth
+      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final uid = userCredential.user!.uid;
+
+      // Save additional user info in Firestore with role 'student'
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'name': name,
+        'email': email,
+        'role': 'student',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      // Navigate to student home after successful signup
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/studentHome');
+      }
+    } on FirebaseAuthException catch (e) {
+      // Handle Firebase signup errors
+      setState(() => _errorMessage = e.message ?? 'Signup failed.');
+    } catch (e) {
+      setState(() => _errorMessage = 'An error occurred. Please try again.');
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0C2D21),
       body: SafeArea(
@@ -53,23 +135,51 @@ class SignUpScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 30),
 
-                      _glassInputField(icon: Icons.person, hintText: "Name"),
+                      // Name input
+                      _glassInputField(
+                        icon: Icons.person,
+                        hintText: "Name",
+                        controller: _nameController,
+                      ),
                       const SizedBox(height: 16),
-                      _glassInputField(icon: Icons.email, hintText: "Email"),
+
+                      // Email input
+                      _glassInputField(
+                        icon: Icons.email,
+                        hintText: "Email",
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
                       const SizedBox(height: 16),
+
+                      // Password input
                       _glassInputField(
                         icon: Icons.lock,
                         hintText: "Password",
                         obscureText: true,
+                        controller: _passwordController,
                       ),
                       const SizedBox(height: 16),
+
+                      // Confirm password input
                       _glassInputField(
                         icon: Icons.lock,
                         hintText: "Confirm Password",
                         obscureText: true,
+                        controller: _confirmPasswordController,
                       ),
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 20),
 
+                      // Display error message if any
+                      if (_errorMessage != null) ...[
+                        Text(
+                          _errorMessage!,
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+
+                      // Signup button
                       SizedBox(
                         width: double.infinity,
                         height: 50,
@@ -81,9 +191,7 @@ class SignUpScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(14),
                           ),
                           child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushNamed(context, '/home');
-                            },
+                            onPressed: _isLoading ? null : _createAccount,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
@@ -91,25 +199,30 @@ class SignUpScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            child: const Text(
-                              "Create Account",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
+                            child: _isLoading
+                                ? const CircularProgressIndicator(color: Colors.black)
+                                : const Text(
+                                    "Create Account",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
 
                       const SizedBox(height: 20),
 
+                      // Google sign in button (no implementation yet)
                       SizedBox(
                         width: double.infinity,
                         height: 50,
                         child: OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () {
+                            // TODO: Implement Google Sign-In here
+                          },
                           icon: const Icon(Icons.g_mobiledata, color: Colors.white),
                           label: const Text(
                             "Continue with Google",
@@ -126,9 +239,10 @@ class SignUpScreen extends StatelessWidget {
 
                       const SizedBox(height: 14),
 
+                      // Link to login screen
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/login');
+                          Navigator.pushReplacementNamed(context, '/login');
                         },
                         child: const Text(
                           "Already have an account? Login",
@@ -146,13 +260,18 @@ class SignUpScreen extends StatelessWidget {
     );
   }
 
+  // Modified input field widget to accept controller & keyboard type
   Widget _glassInputField({
     required IconData icon,
     required String hintText,
     bool obscureText = false,
+    TextEditingController? controller,
+    TextInputType? keyboardType,
   }) {
     return TextField(
+      controller: controller,
       obscureText: obscureText,
+      keyboardType: keyboardType,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: const Color(0xFF00FF84)),

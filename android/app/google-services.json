@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "711526249389",
+    "project_id": "lexivo---dyslexia-assistant",
+    "storage_bucket": "lexivo---dyslexia-assistant.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:711526249389:android:00ac7af86a72450f0ae724",
+        "android_client_info": {
+          "package_name": "com.example.hello_world"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5t0PxQGfMfJU2cccP5Lis2HHPgp_i_Q8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:711526249389:android:0f6d0aab4189ee370ae724",
+        "android_client_info": {
+          "package_name": "com.example.lexivo_assistant_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC5t0PxQGfMfJU2cccP5Lis2HHPgp_i_Q8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
