@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class ChatbotScreen extends StatefulWidget {
   const ChatbotScreen({super.key});
@@ -10,17 +13,11 @@ class ChatbotScreen extends StatefulWidget {
 class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
 
-  final List<String> chatHistory = [
-    "Project Help",
-    "Travel Plan",
-    "PDF Summary",
-  ];
-
   final List<Map<String, dynamic>> assistants = [
     {'label': 'TTS (Text-to-Speech)', 'icon': Icons.record_voice_over},
     {'label': 'STT (Speech-to-Text)', 'icon': Icons.mic},
     {'label': 'Dictionary', 'icon': Icons.book},
-    {'label': 'PDF/Doc Reader', 'icon': Icons.picture_as_pdf},
+    {'label': 'PDF Reader', 'icon': Icons.picture_as_pdf},
     {'label': 'Simplify', 'icon': Icons.lightbulb_outline},
   ];
 
@@ -36,18 +33,63 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   static const Color lightBackground = Color(0xFFFAFAFA);
   static const Color lightCard = Colors.white;
 
-  void sendMessage() {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
+  // ---------------------- CHAT LOGIC ----------------------
+  Future<void> sendMessage({String? text, String assistant = 'Bot'}) async {
+    final userText = text ?? _controller.text.trim();
+    if (userText.isEmpty) return;
 
     setState(() {
-      messages.add({'role': 'user', 'text': text});
-      messages.add({'role': 'bot', 'text': 'You said: "$text"'});
+      messages.add({'role': 'user', 'text': userText});
     });
 
     _controller.clear();
+
+    String botReply = await getBotReply(userText, assistant);
+
+    setState(() {
+      messages.add({'role': 'bot', 'text': botReply});
+    });
   }
 
+  Future<String> getBotReply(String userText, String assistant) async {
+    if (assistant == 'PDF Reader') {
+      String? path = await pickFile();
+      if (path == null) return "No file selected.";
+      try {
+        String content = path.endsWith('.pdf') ? await readPDF(path) : '';
+        return "Here is the content of your file:\n$content";
+      } catch (e) {
+        return "Failed to read file: $e";
+      }
+    }
+    // Default behavior
+    return 'You said: "$userText"';
+  }
+
+  Future<String?> pickFile() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+    if (result != null && result.files.single.path != null) {
+      return result.files.single.path!;
+    }
+    return null;
+  }
+
+  // ---------------------- PDF READER ----------------------
+  Future<String> readPDF(String path) async {
+    final bytes = File(path).readAsBytesSync();
+    final document = PdfDocument(inputBytes: bytes);
+
+    // Extract all text using PdfTextExtractor
+    String text = PdfTextExtractor(document).extractText();
+
+    document.dispose();
+    return text.trim();
+  }
+
+  // ---------------------- WIDGETS ----------------------
   Widget _buildUserMessage(String text) {
     return Align(
       alignment: Alignment.centerRight,
@@ -112,14 +154,16 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             const Text(
               "Assistants",
               style: TextStyle(
-                  color: primaryTeal, fontWeight: FontWeight.bold, fontSize: 18),
+                  color: primaryTeal,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18),
             ),
             const SizedBox(height: 12),
             ...assistants.map(
               (a) => ListTile(
                 leading: Icon(a['icon'], color: secondaryBlue),
                 title: Text(a['label'], style: const TextStyle(color: textColor)),
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
                   setState(() {
                     messages.add({
@@ -127,6 +171,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       'text': 'Switched to ${a['label']} assistant.',
                     });
                   });
+
+                  if (a['label'] == 'PDF Reader') {
+                    await sendMessage(text: '', assistant: 'PDF Reader');
+                  }
                 },
               ),
             ),
@@ -164,7 +212,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                   const Text(
                     'Lexi',
                     style: TextStyle(
-                        color: textColor, fontWeight: FontWeight.bold, fontSize: 21),
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 21),
                   ),
                   const Spacer(),
                   Container(
@@ -205,7 +255,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       padding: const EdgeInsets.only(left: 18),
                       child: TextField(
                         controller: _controller,
-                        style: const TextStyle(color: textColor, fontSize: 14),
+                        style:
+                            const TextStyle(color: textColor, fontSize: 14),
                         maxLines: 4,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
@@ -227,7 +278,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       ),
                       child: const Padding(
                         padding: EdgeInsets.all(10.0),
-                        child: Icon(Icons.send, color: Colors.white),
+                        child: Icon(Icons.send, color: Colors.white, size: 20),
                       ),
                     ),
                     onPressed: sendMessage,
