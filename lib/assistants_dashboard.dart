@@ -27,57 +27,63 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
 
   final List<Map<String, dynamic>> assistants = [
     {
+      'name': 'Lexi The AI Assistant',
+      'icon': Icons.smart_toy_rounded,
+      'color': Color(0xFF00796B),
+      'category': 'AI'
+    },
+    {
       'name': 'Text-to-Speech',
       'icon': Icons.record_voice_over_rounded,
-      'color': Color(0xFF00E5A0),
+      'color': Color(0xFF00796B),
       'category': 'Voice'
     },
     {
       'name': 'Simplify',
       'icon': Icons.auto_fix_high_rounded,
-      'color': Color(0xFF6366F1),
+      'color': Color(0xFF0288D1),
       'category': 'Text'
     },
     {
       'name': 'LexiType',
       'icon': Icons.keyboard_alt_rounded,
-      'color': Color(0xFFEC4899),
+      'color': Color(0xFF43A047),
       'category': 'Typing'
     },
     {
       'name': 'Dictionary',
       'icon': Icons.menu_book_rounded,
-      'color': Color(0xFFF59E0B),
+      'color': Color(0xFF8E24AA),
       'category': 'Reference'
     },
     {
       'name': 'PDF/Doc Reader',
       'icon': Icons.picture_as_pdf_rounded,
-      'color': Color(0xFFEF4444),
+      'color': Color(0xFFD32F2F),
       'category': 'Documents'
     },
     {
       'name': 'Word Coach',
       'icon': Icons.school_rounded,
-      'color': Color(0xFF8B5CF6),
+      'color': Color(0xFF6A1B9A),
       'category': 'Learning'
     },
     {
       'name': 'Speak To Type',
       'icon': Icons.mic_rounded,
-      'color': Color(0xFF06B6D4),
+      'color': Color(0xFF0288D1),
       'category': 'Voice'
     },
     {
       'name': 'Correct Me',
       'icon': Icons.spellcheck_rounded,
-      'color': Color(0xFF10B981),
+      'color': Color(0xFF43A047),
       'category': 'Grammar'
     },
     {
       'name': 'Read Along',
       'icon': Icons.chrome_reader_mode_rounded,
-      'color': Color(0xFFEAB308),
+      'color': Color(0xFFF57C00),
       'category': 'Reading'
     },
   ];
@@ -93,17 +99,16 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0E1A),
+      backgroundColor: const Color(0xFFFAFAFA),
       body: SafeArea(
         child: Column(
           children: [
-            // Fixed Header Section
+            // Header
             Container(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Header Row
                   Row(
                     children: [
                       GestureDetector(
@@ -111,15 +116,19 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                         child: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1C1F2B),
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: const Color(0xFF00E5A0).withOpacity(0.2),
-                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
                           ),
                           child: const Icon(
                             Icons.arrow_back_ios_rounded,
-                            color: Color(0xFF00E5A0),
+                            color: Color(0xFF00796B),
                             size: 18,
                           ),
                         ),
@@ -129,25 +138,28 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                         child: Text(
                           'Smart Assistants',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: Color(0xFF1C1C2A),
                             fontSize: 24,
                             fontWeight: FontWeight.w700,
-                            letterSpacing: -0.5,
                           ),
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1C1F2B),
+                          color: Colors.white,
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: const Color(0xFF00E5A0).withOpacity(0.2),
-                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
                         child: const Icon(
                           Icons.tune_rounded,
-                          color: Color(0xFF00E5A0),
+                          color: Color(0xFF00796B),
                           size: 18,
                         ),
                       ),
@@ -156,23 +168,24 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
 
                   const SizedBox(height: 20),
 
-                  // Search Bar
+                  // Search
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF1C1F2B),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: const Color(0xFF00E5A0).withOpacity(0.1),
-                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
-                        const Icon(
-                          Icons.search_rounded,
-                          color: Color(0xFF00E5A0),
-                          size: 20,
-                        ),
+                        const Icon(Icons.search_rounded,
+                            color: Color(0xFF00796B), size: 20),
                         const SizedBox(width: 12),
                         Expanded(
                           child: TextField(
@@ -182,14 +195,13 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                               });
                             },
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Color(0xFF1C1C2A),
                               fontSize: 15,
-                              fontWeight: FontWeight.w500,
                             ),
                             decoration: const InputDecoration(
                               hintText: "Search assistants...",
                               hintStyle: TextStyle(
-                                color: Color(0xFF6B7280),
+                                color: Color(0xFF9E9E9E),
                                 fontSize: 15,
                               ),
                               border: InputBorder.none,
@@ -205,11 +217,8 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                                 _searchQuery = '';
                               });
                             },
-                            child: const Icon(
-                              Icons.close_rounded,
-                              color: Color(0xFF6B7280),
-                              size: 18,
-                            ),
+                            child: const Icon(Icons.close_rounded,
+                                color: Color(0xFF9E9E9E), size: 18),
                           ),
                       ],
                     ),
@@ -217,7 +226,7 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
 
                   const SizedBox(height: 16),
 
-                  // Stats Row
+                  // Stats
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -226,24 +235,22 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                             ? '${assistants.length} assistants available'
                             : '${filteredAssistants.length} results found',
                         style: const TextStyle(
-                          color: Color(0xFF6B7280),
+                          color: Color(0xFF616161),
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 5),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF00E5A0).withOpacity(0.1),
+                          color: const Color(0xFF00796B).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFF00E5A0).withOpacity(0.2),
-                          ),
                         ),
                         child: const Text(
                           'All Active',
                           style: TextStyle(
-                            color: Color(0xFF00E5A0),
+                            color: Color(0xFF00796B),
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
                           ),
@@ -251,13 +258,12 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 20),
                 ],
               ),
             ),
 
-            // Assistants Grid - Scrollable
+            // Grid
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -272,45 +278,47 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                   ),
                   itemBuilder: (context, index) {
                     final assistant = filteredAssistants[index];
-                    return ImprovedAssistantCard(
+                    return LightAssistantCard(
                       name: assistant['name'],
                       icon: assistant['icon'],
                       color: assistant['color'],
                       category: assistant['category'],
                       onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('${assistant['name']} activated'),
-                            backgroundColor: assistant['color'],
-                            behavior: SnackBarBehavior.floating,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                        if (assistant['name'] == 'Lexi The AI Assistant') {
+                          Navigator.pushNamed(context, '/chat');
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${assistant['name']} activated'),
+                              backgroundColor: assistant['color'],
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              margin: const EdgeInsets.all(20),
+                              duration: const Duration(seconds: 2),
                             ),
-                            margin: const EdgeInsets.all(20),
-                            duration: const Duration(seconds: 2),
-                          ),
-                        );
+                          );
+                        }
                       },
                     );
                   },
                 ),
               ),
             ),
-
-            const SizedBox(height: 20),
           ],
         ),
       ),
 
-      // Floating Bottom Navigation
+      // Bottom Nav
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1F2B),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withOpacity(0.05),
               offset: const Offset(0, 4),
               blurRadius: 20,
             ),
@@ -322,8 +330,8 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,
             backgroundColor: Colors.transparent,
-            selectedItemColor: const Color(0xFF00E5A0),
-            unselectedItemColor: const Color(0xFF6B7280),
+            selectedItemColor: const Color(0xFF00796B),
+            unselectedItemColor: const Color(0xFF9E9E9E),
             type: BottomNavigationBarType.fixed,
             elevation: 0,
             showSelectedLabels: false,
@@ -353,14 +361,14 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
   }
 }
 
-class ImprovedAssistantCard extends StatelessWidget {
+class LightAssistantCard extends StatelessWidget {
   final String name;
   final IconData icon;
   final Color color;
   final String category;
   final VoidCallback onTap;
 
-  const ImprovedAssistantCard({
+  const LightAssistantCard({
     super.key,
     required this.name,
     required this.icon,
@@ -376,46 +384,35 @@ class ImprovedAssistantCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1F2B),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: color.withOpacity(0.15),
-            width: 1,
-          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
           ],
+          border: Border.all(
+            color: color.withOpacity(0.2),
+            width: 1,
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top section with icon
+            // Icon
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        color.withOpacity(0.2),
-                        color.withOpacity(0.1),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(
-                    icon,
-                    color: color,
-                    size: 24,
-                  ),
+                  child: Icon(icon, color: color, size: 24),
                 ),
                 Container(
                   width: 6,
@@ -428,24 +425,24 @@ class ImprovedAssistantCard extends StatelessWidget {
               ],
             ),
 
-            // Middle section with name
+            // Name + category
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1C1C2A),
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
@@ -462,12 +459,13 @@ class ImprovedAssistantCard extends StatelessWidget {
               ],
             ),
 
-            // Bottom section with action
+            // Status
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -481,11 +479,7 @@ class ImprovedAssistantCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: color,
-                  size: 14,
-                ),
+                Icon(Icons.arrow_forward_ios, color: color, size: 14),
               ],
             ),
           ],
