@@ -6,323 +6,224 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Light Theme Colors
+    const backgroundColor = Color(0xFFF5F5F5);
+    const cardColor = Colors.white;
+    const accentColor = Color(0xFF00E5A0); // Main accent
+    const secondaryAccent = Color(0xFF6366F1);
+    const tertiaryAccent = Color(0xFFEC4899);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0E1A), // Deep dark background
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-
-                // Header Section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Profile',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.5,
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Profile',
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: accentColor.withOpacity(0.3),
                       ),
                     ),
+                    child: const Icon(Icons.edit_outlined, color: accentColor, size: 24),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+
+              // Profile Card
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.1),
+                      offset: const Offset(0, 4),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    // Profile Avatar
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF1C1F2B),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: const Color(0xFF00E5A0).withOpacity(0.2),
-                          width: 1,
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [accentColor, secondaryAccent],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
                       ),
-                      child: const Icon(
-                        Icons.edit_outlined,
-                        color: Color(0xFF00E5A0),
-                        size: 24,
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: cardColor,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.person_rounded, size: 40, color: accentColor),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Hello, Hari",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Text(
+                        "Premium User",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: accentColor,
+                        ),
                       ),
                     ),
                   ],
                 ),
+              ),
+              const SizedBox(height: 40),
 
-                const SizedBox(height: 40),
-
-                // Profile Header Card
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF00E5A0).withOpacity(0.1),
-                        const Color(0xFF00C4CC).withOpacity(0.05),
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(
-                      color: const Color(0xFF00E5A0).withOpacity(0.2),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF00E5A0).withOpacity(0.1),
-                        offset: const Offset(0, 8),
-                        blurRadius: 32,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                      // Profile Avatar
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [
-                              const Color(0xFF00E5A0),
-                              const Color(0xFF00C4CC),
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: Container(
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF1C1F2B),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            size: 40,
-                            color: Color(0xFF00E5A0),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      const Text(
-                        "Hello, Hari",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF00E5A0).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Text(
-                          "Premium User",
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF00E5A0),
-                          ),
-                        ),
-                      ),
-                    ],
+              // Account Settings Header
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Account Settings',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
+              ),
+              const SizedBox(height: 20),
 
-                const SizedBox(height: 40),
+              // Account Options
+              _buildOptionTile(
+                context,
+                Icons.person_outline_rounded,
+                "User Information",
+                "Manage your personal details",
+                accentColor,
+                cardColor,
+              ),
+              const SizedBox(height: 16),
+              _buildOptionTile(
+                context,
+                Icons.bar_chart_rounded,
+                "Progress",
+                "View your learning statistics",
+                secondaryAccent,
+                cardColor,
+              ),
+              const SizedBox(height: 16),
+              _buildOptionTile(
+                context,
+                Icons.settings_outlined,
+                "Settings",
+                "Customize app preferences",
+                tertiaryAccent,
+                cardColor,
+              ),
+              const SizedBox(height: 32),
 
-                // Profile Menu Section
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Account Settings',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.3,
-                    ),
+              // App Info Header
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'App Information',
+                  style: TextStyle(
+                    color: Colors.black87,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
-
-                const SizedBox(height: 20),
-
-                // Profile Options
-                _buildModernProfileOption(
-                  context,
-                  Icons.person_outline_rounded,
-                  "User  Information",
-                  "Manage your personal details",
-                  const Color(0xFF00E5A0),
-                ),
-                const SizedBox(height: 16),
-                _buildModernProfileOption(
-                  context,
-                  Icons.bar_chart_rounded,
-                  "Progress",
-                  "View your learning statistics",
-                  const Color(0xFF6366F1),
-                ),
-                const SizedBox(height: 16),
-                _buildModernProfileOption(
-                  context,
-                  Icons.settings_outlined,
-                  "Settings",
-                  "Customize app preferences",
-                  const Color(0xFFEC4899),
-                ),
-
-                const SizedBox(height: 32),
-
-                // App Info Section
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'App Information',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                _buildModernProfileOption(
-                  context,
-                  Icons.info_outline_rounded,
-                  "Application Info",
-                  "Version and app details",
-                  const Color(0xFFF59E0B),
-                ),
-                const SizedBox(height: 16),
-                _buildModernProfileOption(
-                  context,
-                  Icons.description_outlined,
-                  "Terms and Conditions",
-                  "Legal information and policies",
-                  const Color(0xFF8B5CF6),
-                ),
-                const SizedBox(height: 16),
-                _buildModernProfileOption(
-                  context,
-                  Icons.logout_rounded,
-                  "Logout",
-                  "Sign out of your account",
-                  const Color(0xFFEF4444),
-                ),
-
-                const SizedBox(height: 120), // Extra space for bottom navigation
-              ],
-            ),
-          ),
-        ),
-      ),
-
-      // Bottom Navigation Bar
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF1C1F2B),
-          borderRadius: BorderRadius.circular(25),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              offset: const Offset(0, 4),
-              blurRadius: 20,
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(25),
-          child: BottomNavigationBar(
-            backgroundColor: Colors.transparent,
-            selectedItemColor: const Color(0xFF00E5A0), // Bright teal
-            unselectedItemColor: const Color(0xFF6B7280),
-            currentIndex: 3, // Profile page index
-            type: BottomNavigationBarType.fixed,
-            elevation: 0,
-            showSelectedLabels: false,
-            showUnselectedLabels: false,
-            onTap: (index) {
-              switch (index) {
-                case 0:
-                  Navigator.pushReplacementNamed(context, '/home');
-                  break;
-                case 1:
-                  Navigator.pushReplacementNamed(context, '/assistants');
-                  break;
-                case 2:
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const ChatbotScreen(initialTabIndex: 2), // Highlight Chatbot tab
-                    ),
-                  );
-                  break;
-                case 3:
-                  // Already in Profile
-                  break;
-              }
-            },
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home_rounded, size: 26),
-                label: '',
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.apps_rounded, size: 26),
-                label: '',
+              const SizedBox(height: 20),
+
+              // App Info Options
+              _buildOptionTile(
+                context,
+                Icons.info_outline_rounded,
+                "Application Info",
+                "Version and app details",
+                Color(0xFFF59E0B),
+                cardColor,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.chat_bubble_rounded, size: 26),
-                label: '',
+              const SizedBox(height: 16),
+              _buildOptionTile(
+                context,
+                Icons.description_outlined,
+                "Terms and Conditions",
+                "Legal information and policies",
+                Color(0xFF8B5CF6),
+                cardColor,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.person_rounded, size: 26),
-                label: '',
+              const SizedBox(height: 16),
+              _buildOptionTile(
+                context,
+                Icons.logout_rounded,
+                "Logout",
+                "Sign out of your account",
+                Color(0xFFEF4444),
+                cardColor,
               ),
+              const SizedBox(height: 120),
             ],
           ),
         ),
       ),
+
+      // Bottom Navigation
+      bottomNavigationBar: _buildBottomNavBar(context),
     );
   }
 
-  Widget _buildModernProfileOption(
-    BuildContext context,
-    IconData icon,
-    String title,
-    String subtitle,
-    Color color,
-  ) {
+  Widget _buildOptionTile(
+      BuildContext context, IconData icon, String title, String subtitle, Color color, Color cardColor) {
     return GestureDetector(
-      onTap: () {
-        // Add specific navigation based on title
-        _handleProfileOptionTap(context, title);
-      },
+      onTap: () => _handleOptionTap(context, title),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF1C1F2B),
+          color: cardColor,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: color.withOpacity(0.1),
-            width: 1,
-          ),
+          border: Border.all(color: color.withOpacity(0.1)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
               offset: const Offset(0, 2),
-              blurRadius: 10,
+              blurRadius: 6,
             ),
           ],
         ),
@@ -332,110 +233,48 @@ class ProfileScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    color.withOpacity(0.2),
-                    color.withOpacity(0.1),
-                  ],
+                  colors: [color.withOpacity(0.2), color.withOpacity(0.1)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(16),
               ),
-              child: Icon(
-                icon,
-                color: color,
-                size: 24,
-              ),
+              child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: -0.3,
-                    ),
-                  ),
+                  Text(title,
+                      style: TextStyle(
+                          color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 18)),
                   const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      color: Color(0xFF6B7280),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  Text(subtitle, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
                 ],
               ),
             ),
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(
-                Icons.arrow_forward_ios,
-                color: color,
-                size: 16,
-              ),
-            ),
+            Icon(Icons.arrow_forward_ios, color: color.withOpacity(0.8), size: 16),
           ],
         ),
       ),
     );
   }
 
-  void _handleProfileOptionTap(BuildContext context, String title) {
-    // Handle specific navigation or actions based on the option selected
+  void _handleOptionTap(BuildContext context, String title) {
     switch (title) {
-      case "User  Information":
-        // Navigate to user info page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Opening $title..."),
-            backgroundColor: const Color(0xFF00E5A0),
-          ),
-        );
-        break;
+      case "User Information":
       case "Progress":
-        // Navigate to progress page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Opening $title..."),
-            backgroundColor: const Color(0xFF6366F1),
-          ),
-        );
-        break;
       case "Settings":
-        // Navigate to settings page
+      case "Terms and Conditions":
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Opening $title..."),
-            backgroundColor: const Color(0xFFEC4899),
-          ),
+          SnackBar(content: Text("Opening $title..."), backgroundColor: Colors.grey[700]),
         );
         break;
       case "Application Info":
-        // Show app info dialog
         _showAppInfoDialog(context);
         break;
-      case "Terms and Conditions":
-        // Navigate to terms page
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Opening $title..."),
-            backgroundColor: const Color(0xFF8B5CF6),
-          ),
-        );
-        break;
       case "Logout":
-        // Show logout confirmation
         _showLogoutDialog(context);
         break;
     }
@@ -444,100 +283,98 @@ class ProfileScreen extends StatelessWidget {
   void _showAppInfoDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1C1F2B),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            "Application Info",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: const Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Version: 1.0.0",
-                style: TextStyle(color: Color(0xFF6B7280)),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "Build: 2024.1",
-                style: TextStyle(color: Color(0xFF6B7280)),
-              ),
-              SizedBox(height: 8),
-              Text(
-                "Developed with Flutter",
-                style: TextStyle(color: Color(0xFF6B7280)),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                "Close",
-                style: TextStyle(color: Color(0xFF00E5A0)),
-              ),
-            ),
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Application Info", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w700)),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Version: 1.0.0", style: TextStyle(color: Colors.black54)),
+            SizedBox(height: 8),
+            Text("Build: 2024.1", style: TextStyle(color: Colors.black54)),
+            SizedBox(height: 8),
+            Text("Developed with Flutter", style: TextStyle(color: Colors.black54)),
           ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Close", style: TextStyle(color: Color(0xFF00E5A0))),
+          ),
+        ],
+      ),
     );
   }
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color(0xFF1C1F2B),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Logout", style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w700)),
+        content: const Text("Are you sure you want to sign out?", style: TextStyle(color: Colors.black54)),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel", style: TextStyle(color: Colors.grey))),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Logged out successfully"), backgroundColor: Color(0xFFEF4444)),
+              );
+            },
+            child: const Text("Logout", style: TextStyle(color: Color(0xFFEF4444))),
           ),
-          title: const Text(
-            "Logout",
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: const Text(
-            "Are you sure you want to sign out of your account?",
-            style: TextStyle(color: Color(0xFF6B7280)),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                "Cancel",
-                style: TextStyle(color: Color(0xFF6B7280)),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                // Add logout functionality here
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Logged out successfully"),
-                    backgroundColor: Color(0xFFEF4444),
-                  ),
-                );
-              },
-              child: const Text(
-                "Logout",
-                style: TextStyle(color: Color(0xFFEF4444)),
-              ),
-            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBottomNavBar(BuildContext context) {
+    const selectedColor = Color(0xFF00E5A0);
+    const unselectedColor = Colors.grey;
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), offset: Offset(0, 4), blurRadius: 10)],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(25),
+        child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          selectedItemColor: selectedColor,
+          unselectedItemColor: unselectedColor,
+          currentIndex: 3,
+          type: BottomNavigationBarType.fixed,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          onTap: (index) {
+            switch (index) {
+              case 0:
+                Navigator.pushReplacementNamed(context, '/home');
+                break;
+              case 1:
+                Navigator.pushReplacementNamed(context, '/assistants');
+                break;
+              case 2:
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotScreen()));
+                break;
+              case 3:
+                break;
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home_rounded, size: 26), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.apps_rounded, size: 26), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.chat_bubble_rounded, size: 26), label: ''),
+            BottomNavigationBarItem(icon: Icon(Icons.person_rounded, size: 26), label: ''),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 }
