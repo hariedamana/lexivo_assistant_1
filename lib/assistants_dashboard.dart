@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dictionary_screen.dart';
+import 'word_coach.dart';
+import 'lexi_type.dart';
 
 class AssistantsDashboard extends StatefulWidget {
   const AssistantsDashboard({super.key});
@@ -30,69 +33,72 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
       'name': 'Lexi The AI Assistant',
       'icon': Icons.smart_toy_rounded,
       'color': Color(0xFF00796B),
-      'category': 'AI'
+      'category': 'AI',
     },
     {
       'name': 'Text-to-Speech',
       'icon': Icons.record_voice_over_rounded,
       'color': Color(0xFF00796B),
-      'category': 'Voice'
+      'category': 'Voice',
     },
     {
       'name': 'Simplify',
       'icon': Icons.auto_fix_high_rounded,
       'color': Color(0xFF0288D1),
-      'category': 'Text'
+      'category': 'Text',
     },
     {
       'name': 'LexiType',
       'icon': Icons.keyboard_alt_rounded,
       'color': Color(0xFF43A047),
-      'category': 'Typing'
+      'category': 'Typing',
     },
     {
       'name': 'Dictionary',
       'icon': Icons.menu_book_rounded,
       'color': Color(0xFF8E24AA),
-      'category': 'Reference'
+      'category': 'Reference',
     },
     {
       'name': 'PDF/Doc Reader',
       'icon': Icons.picture_as_pdf_rounded,
       'color': Color(0xFFD32F2F),
-      'category': 'Documents'
+      'category': 'Documents',
     },
     {
       'name': 'Word Coach',
       'icon': Icons.school_rounded,
       'color': Color(0xFF6A1B9A),
-      'category': 'Learning'
+      'category': 'Learning',
     },
     {
       'name': 'Speak To Type',
       'icon': Icons.mic_rounded,
       'color': Color(0xFF0288D1),
-      'category': 'Voice'
+      'category': 'Voice',
     },
     {
       'name': 'Correct Me',
       'icon': Icons.spellcheck_rounded,
       'color': Color(0xFF43A047),
-      'category': 'Grammar'
+      'category': 'Grammar',
     },
     {
       'name': 'Read Along',
       'icon': Icons.chrome_reader_mode_rounded,
       'color': Color(0xFFF57C00),
-      'category': 'Reading'
+      'category': 'Reading',
     },
   ];
 
   List<Map<String, dynamic>> get filteredAssistants {
     if (_searchQuery.isEmpty) return assistants;
     return assistants
-        .where((assistant) =>
-            assistant['name'].toLowerCase().contains(_searchQuery.toLowerCase()))
+        .where(
+          (assistant) => assistant['name'].toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ),
+        )
         .toList();
   }
 
@@ -170,7 +176,10 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
 
                   // Search
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -184,8 +193,11 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.search_rounded,
-                            color: Color(0xFF00796B), size: 20),
+                        const Icon(
+                          Icons.search_rounded,
+                          color: Color(0xFF00796B),
+                          size: 20,
+                        ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: TextField(
@@ -217,8 +229,11 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                                 _searchQuery = '';
                               });
                             },
-                            child: const Icon(Icons.close_rounded,
-                                color: Color(0xFF9E9E9E), size: 18),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              color: Color(0xFF9E9E9E),
+                              size: 18,
+                            ),
                           ),
                       ],
                     ),
@@ -242,7 +257,9 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 5),
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF00796B).withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
@@ -286,6 +303,27 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                       onTap: () {
                         if (assistant['name'] == 'Lexi The AI Assistant') {
                           Navigator.pushNamed(context, '/chat');
+                        } else if (assistant['name'] == 'Dictionary') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DictionaryScreen(),
+                            ),
+                          );
+                        } else if (assistant['name'] == 'Word Coach') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const WordCoachScreen(),
+                            ),
+                          );
+                        } else if (assistant['name'] == 'LexiType') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LexiTypeScreen(),
+                            ),
+                          );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
@@ -393,10 +431,7 @@ class LightAssistantCard extends StatelessWidget {
               offset: const Offset(0, 4),
             ),
           ],
-          border: Border.all(
-            color: color.withOpacity(0.2),
-            width: 1,
-          ),
+          border: Border.all(color: color.withOpacity(0.2), width: 1),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -441,8 +476,10 @@ class LightAssistantCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(6),
@@ -464,8 +501,10 @@ class LightAssistantCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),

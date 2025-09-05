@@ -16,6 +16,8 @@ dependencies:
   firebase_auth: ^6.0.1
   firebase_analytics: ^12.0.0
   cloud_firestore: ^6.0.0
+  fl_chart: ^0.60.0
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:
@@ -26,3 +28,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/lexivo_bot.png
+    - assets/words.json
+
