@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class SimplifyAssistant extends StatelessWidget {
   @override
@@ -13,7 +15,7 @@ class SimplifyAssistant extends StatelessWidget {
       home: AssistantDashboard(),
       routes: {
         '/simplify-text': (context) => SimplifyTextPage(),
-        '/syllable-breakdown': (context) => SyllableBreakdownPage(),
+        '/syllables': (context) => SyllableBreakdownPage(),
       },
     );
   }
@@ -27,10 +29,7 @@ class AssistantDashboard extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Simplify Assistant',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         ),
         backgroundColor: Colors.blue[600],
         elevation: 0,
@@ -65,11 +64,7 @@ class AssistantDashboard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      Icons.assistant,
-                      color: Colors.white,
-                      size: 40,
-                    ),
+                    Icon(Icons.assistant, color: Colors.white, size: 40),
                     SizedBox(height: 10),
                     Text(
                       'Welcome to Simplify Assistant',
@@ -81,17 +76,14 @@ class AssistantDashboard extends StatelessWidget {
                     ),
                     Text(
                       'Choose a tool to get started',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
+                      style: TextStyle(color: Colors.white70, fontSize: 14),
                     ),
                   ],
                 ),
               ),
-              
+
               SizedBox(height: 30),
-              
+
               Text(
                 'Available Tools',
                 style: TextStyle(
@@ -100,17 +92,15 @@ class AssistantDashboard extends StatelessWidget {
                   color: Colors.grey[700],
                 ),
               ),
-              
+
               SizedBox(height: 15),
-              
+
               // Simplify Text Card
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => SimplifyTextPage(),
-                    ),
+                    MaterialPageRoute(builder: (context) => SimplifyTextPage()),
                   );
                 },
                 child: Container(
@@ -180,7 +170,7 @@ class AssistantDashboard extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Syllable Breakdown Card
               GestureDetector(
                 onTap: () {
@@ -257,17 +247,14 @@ class AssistantDashboard extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               Spacer(),
-              
+
               // Footer
               Center(
                 child: Text(
                   'Choose a tool above to get started',
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: Colors.grey[500], fontSize: 14),
                 ),
               ),
             ],
@@ -327,7 +314,11 @@ class _SimplifyTextPageState extends State<SimplifyTextPage> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.text_fields, color: Colors.green[600], size: 30),
+                        Icon(
+                          Icons.text_fields,
+                          color: Colors.green[600],
+                          size: 30,
+                        ),
                         SizedBox(width: 15),
                         Text(
                           'Text Simplification',
@@ -342,17 +333,14 @@ class _SimplifyTextPageState extends State<SimplifyTextPage> {
                     SizedBox(height: 10),
                     Text(
                       'Enter complex text below and get a simplified version that\'s easier to understand.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
               ),
-              
+
               SizedBox(height: 20),
-              
+
               // Input Section
               Text(
                 'Enter Text to Simplify',
@@ -362,9 +350,9 @@ class _SimplifyTextPageState extends State<SimplifyTextPage> {
                   color: Colors.grey[700],
                 ),
               ),
-              
+
               SizedBox(height: 10),
-              
+
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -394,9 +382,9 @@ class _SimplifyTextPageState extends State<SimplifyTextPage> {
                   ),
                 ),
               ),
-              
+
               SizedBox(height: 20),
-              
+
               // Simplify Button
               Container(
                 width: double.infinity,
@@ -423,7 +411,10 @@ class _SimplifyTextPageState extends State<SimplifyTextPage> {
                               ),
                             ),
                             SizedBox(width: 10),
-                            Text('Simplifying...', style: TextStyle(fontSize: 16)),
+                            Text(
+                              'Simplifying...',
+                              style: TextStyle(fontSize: 16),
+                            ),
                           ],
                         )
                       : Text(
@@ -435,9 +426,9 @@ class _SimplifyTextPageState extends State<SimplifyTextPage> {
                         ),
                 ),
               ),
-              
+
               SizedBox(height: 20),
-              
+
               // Output Section
               if (_simplifiedText.isNotEmpty) ...[
                 Text(
@@ -448,9 +439,9 @@ class _SimplifyTextPageState extends State<SimplifyTextPage> {
                     color: Colors.grey[700],
                   ),
                 ),
-                
+
                 SizedBox(height: 10),
-                
+
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.all(15),
@@ -478,11 +469,11 @@ class _SimplifyTextPageState extends State<SimplifyTextPage> {
 
   void _simplifyText() {
     if (_inputController.text.trim().isEmpty) return;
-    
+
     setState(() {
       _isLoading = true;
     });
-    
+
     // Simulate API call
     Future.delayed(Duration(seconds: 2), () {
       setState(() {
@@ -548,7 +539,11 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.speaker_notes, color: Colors.orange[600], size: 30),
+                        Icon(
+                          Icons.speaker_notes,
+                          color: Colors.orange[600],
+                          size: 30,
+                        ),
                         SizedBox(width: 15),
                         Text(
                           'Syllable Breakdown',
@@ -563,17 +558,14 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
                     SizedBox(height: 10),
                     Text(
                       'Enter a word to break it down into syllables for easier pronunciation and reading.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                     ),
                   ],
                 ),
               ),
-              
+
               SizedBox(height: 20),
-              
+
               // Input Section
               Text(
                 'Enter Word',
@@ -583,9 +575,9 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
                   color: Colors.grey[700],
                 ),
               ),
-              
+
               SizedBox(height: 10),
-              
+
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -611,13 +603,16 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
                     filled: true,
                     fillColor: Colors.white,
                     contentPadding: EdgeInsets.all(15),
-                    prefixIcon: Icon(Icons.text_fields, color: Colors.orange[600]),
+                    prefixIcon: Icon(
+                      Icons.text_fields,
+                      color: Colors.orange[600],
+                    ),
                   ),
                 ),
               ),
-              
+
               SizedBox(height: 20),
-              
+
               // Break Down Button
               Container(
                 width: double.infinity,
@@ -644,7 +639,10 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
                               ),
                             ),
                             SizedBox(width: 10),
-                            Text('Breaking Down...', style: TextStyle(fontSize: 16)),
+                            Text(
+                              'Breaking Down...',
+                              style: TextStyle(fontSize: 16),
+                            ),
                           ],
                         )
                       : Text(
@@ -656,9 +654,9 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
                         ),
                 ),
               ),
-              
+
               SizedBox(height: 20),
-              
+
               // Output Section
               if (_syllables.isNotEmpty) ...[
                 Text(
@@ -669,9 +667,9 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
                     color: Colors.grey[700],
                   ),
                 ),
-                
+
                 SizedBox(height: 10),
-                
+
                 Container(
                   width: double.infinity,
                   padding: EdgeInsets.all(20),
@@ -687,7 +685,10 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
                         runSpacing: 10,
                         children: _syllables.map((syllable) {
                           return Container(
-                            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 15,
+                              vertical: 8,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.orange[100],
                               borderRadius: BorderRadius.circular(20),
@@ -724,36 +725,55 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
     );
   }
 
-  void _breakDownSyllables() {
-    if (_inputController.text.trim().isEmpty) return;
-    
+  void _breakDownSyllables() async {
+    final word = _inputController.text.trim();
+    if (word.isEmpty) return;
+
     setState(() {
       _isLoading = true;
     });
-    
-    // Simulate API call with basic syllable breakdown
-    Future.delayed(Duration(seconds: 1), () {
-      String word = _inputController.text.trim().toLowerCase();
-      List<String> syllables = _simpleSyllableBreakdown(word);
-      
+
+    try {
+      // Use 10.0.2.2 for Android emulator to access localhost backend
+      final url = Uri.parse('http://10.0.2.2:8000/syllables');
+
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'word': word}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        List<String> syllables = List<String>.from(data['syllables']);
+        setState(() {
+          _syllables = syllables;
+        });
+      } else {
+        print('Backend error: ${response.statusCode}');
+        // Optionally handle error UI here
+      }
+    } catch (e) {
+      print('Failed to connect to backend: $e');
+      // Optionally handle connection error UI here
+    } finally {
       setState(() {
-        _syllables = syllables;
         _isLoading = false;
       });
-    });
+    }
   }
 
   List<String> _simpleSyllableBreakdown(String word) {
-    // Simple syllable breakdown logic (you can replace with more sophisticated algorithm)
+    // Keeping your local fallback logic intact (optional)
     if (word.length <= 3) return [word];
-    
+
     List<String> vowels = ['a', 'e', 'i', 'o', 'u', 'y'];
     List<String> syllables = [];
     String currentSyllable = '';
-    
+
     for (int i = 0; i < word.length; i++) {
       currentSyllable += word[i];
-      
+
       if (vowels.contains(word[i]) && currentSyllable.length >= 2) {
         if (i < word.length - 1 && !vowels.contains(word[i + 1])) {
           syllables.add(currentSyllable);
@@ -761,7 +781,7 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
         }
       }
     }
-    
+
     if (currentSyllable.isNotEmpty) {
       if (syllables.isNotEmpty) {
         syllables.last += currentSyllable;
@@ -769,7 +789,7 @@ class _SyllableBreakdownPageState extends State<SyllableBreakdownPage> {
         syllables.add(currentSyllable);
       }
     }
-    
+
     return syllables.isEmpty ? [word] : syllables;
   }
 
