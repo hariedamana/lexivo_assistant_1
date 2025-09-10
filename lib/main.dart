@@ -31,7 +31,6 @@ class LexivoApp extends StatelessWidget {
         '/signup': (context) => const SignUpScreen(),
         '/home': (context) => const HomeScreen(),
         '/assistants': (context) => AssistantsDashboard(),
-        '/chat': (context) => const ChatbotScreen(),
         '/profile': (context) => const ProfileScreen(), // <-- Chatbot route
       },
     );

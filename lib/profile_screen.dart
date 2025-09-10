@@ -361,9 +361,6 @@ class ProfileScreen extends StatelessWidget {
                 Navigator.pushReplacementNamed(context, '/assistants');
                 break;
               case 2:
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatbotScreen()));
-                break;
-              case 3:
                 break;
             }
           },

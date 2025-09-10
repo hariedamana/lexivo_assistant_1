@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dictionary_screen.dart';
 import 'word_coach.dart';
 import 'lexi_type.dart';
+import 'simplify_assistant.dart';
 
 class AssistantsDashboard extends StatefulWidget {
   const AssistantsDashboard({super.key});
@@ -324,7 +325,14 @@ class _AssistantsDashboardState extends State<AssistantsDashboard> {
                               builder: (context) => const LexiTypeScreen(),
                             ),
                           );
-                        } else {
+                        } else if (assistant['name'] == 'Simplify') {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>  SimplifyAssistant(),
+                            ),
+                          );
+                        }else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('${assistant['name']} activated'),
