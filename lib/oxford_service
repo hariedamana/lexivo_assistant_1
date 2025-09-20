@@ -1,0 +1,37 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+
+class OxfordApiService {
+  static const String _baseUrl = 'https://od-api.oxforddictionaries.com/api/v2';
+  static const String _language = 'en-gb'; // UK English
+  static const String _appId = 'bcd4d62f'; // Replace with your Oxford API App ID
+  static const String _appKey = 'e488df2938f7d808b2fad9b4e1187151'; // Replace with your Oxford API App Key
+
+  /// Fetch word definition from Oxford API
+  static Future<String?> getWordDefinition(String word) async {
+    try {
+      final url = Uri.parse('$_baseUrl/entries/$_language/${word.toLowerCase()}');
+      final response = await http.get(url, headers: {
+        'app_id': _appId,
+        'app_key': _appKey,
+      });
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        // Extract the first definition
+        final senses = data['results'][0]['lexicalEntries'][0]['entries'][0]['senses'];
+        if (senses != null && senses.isNotEmpty) {
+          return senses[0]['definitions'][0];
+        }
+      } else if (response.statusCode == 404) {
+        return 'No definition found for this word.';
+      } else {
+        return 'Error: ${response.statusCode}';
+      }
+    } catch (e) {
+      return 'Failed to fetch definition. Please check your connection.';
+    }
+    return null;
+  }
+}

@@ -12,11 +12,25 @@ class DictionaryScreen extends StatefulWidget {
 class _DictionaryScreenState extends State<DictionaryScreen>
     with TickerProviderStateMixin {
   String _searchQuery = '';
-  Map<String, String> _allWords = {}; // Full A-Z dictionary
+  Map<String, String> _allWords = {};
   bool _isLoading = true;
   final TextEditingController _searchController = TextEditingController();
   late AnimationController _searchAnimationController;
+  late AnimationController _fadeAnimationController;
   late Animation<double> _searchAnimation;
+  late Animation<double> _fadeAnimation;
+
+  // Professional Dark Theme Colors
+  static const Color primaryDark = Color(0xFF0D1117);
+  static const Color secondaryDark = Color(0xFF161B22);
+  static const Color cardDark = Color(0xFF21262D);
+  static const Color borderDark = Color(0xFF30363D);
+  static const Color accentBlue = Color(0xFF58A6FF);
+  static const Color accentGreen = Color(0xFF3FB950);
+  static const Color accentOrange = Color(0xFFDB6D28);
+  static const Color textPrimary = Color(0xFFF0F6FC);
+  static const Color textSecondary = Color(0xFF8B949E);
+  static const Color textMuted = Color(0xFF656D76);
 
   @override
   void initState() {
@@ -27,7 +41,12 @@ class _DictionaryScreenState extends State<DictionaryScreen>
 
   void _initializeAnimations() {
     _searchAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    
+    _fadeAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
     
@@ -35,25 +54,51 @@ class _DictionaryScreenState extends State<DictionaryScreen>
       parent: _searchAnimationController,
       curve: Curves.easeInOut,
     );
+    
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeAnimationController,
+      curve: Curves.easeOutCubic,
+    );
   }
 
   Future<void> _loadDictionary() async {
-    // Load the JSON file from assets
-    String jsonString = await rootBundle.loadString('assets/words.json');
-    Map<String, dynamic> jsonMap = jsonDecode(jsonString);
+    await Future.delayed(const Duration(milliseconds: 1000));
+    
+    try {
+      String jsonString = await rootBundle.loadString('assets/words.json');
+      Map<String, dynamic> jsonMap = jsonDecode(jsonString);
 
-    // Flatten the nested A-Z map into one map
-    Map<String, String> flatMap = {};
-    jsonMap.forEach((letter, words) {
-      (words as Map<String, dynamic>).forEach((word, definition) {
-        flatMap[word] = definition.toString();
+      Map<String, String> flatMap = {};
+      jsonMap.forEach((letter, words) {
+        (words as Map<String, dynamic>).forEach((word, definition) {
+          flatMap[word] = definition.toString();
+        });
       });
-    });
 
-    setState(() {
-      _allWords = flatMap;
-      _isLoading = false;
-    });
+      setState(() {
+        _allWords = flatMap;
+        _isLoading = false;
+      });
+      
+      _fadeAnimationController.forward();
+    } catch (e) {
+      setState(() {
+        _allWords = {
+          'apple': 'A round fruit with red or green skin and crisp flesh',
+          'book': 'A set of written or printed pages bound together for reading',
+          'computer': 'An electronic device for storing and processing data',
+          'dictionary': 'A reference work containing words and their meanings',
+          'education': 'The process of teaching and learning knowledge',
+          'flutter': 'A UI toolkit for building natively compiled applications',
+          'knowledge': 'Information and skills acquired through experience',
+          'language': 'A system of communication used by humans',
+          'learning': 'The process of acquiring new understanding',
+          'programming': 'The process of creating computer software',
+        };
+        _isLoading = false;
+      });
+      _fadeAnimationController.forward();
+    }
   }
 
   void _clearSearch() {
@@ -64,18 +109,103 @@ class _DictionaryScreenState extends State<DictionaryScreen>
     _searchAnimationController.reverse();
   }
 
-  Widget _buildSearchField() {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00796B).withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+        color: primaryDark,
+        border: Border(
+          bottom: BorderSide(
+            color: borderDark,
+            width: 1,
           ),
-        ],
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: cardDark,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: borderDark,
+                        width: 1,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back_rounded,
+                      color: textSecondary,
+                      size: 20,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Text(
+                  'Dictionary',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    color: textPrimary,
+                    fontFamily: 'Lexend',
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: accentBlue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: accentBlue.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Text(
+                    '${_allWords.length} entries',
+                    style: const TextStyle(
+                      color: accentBlue,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Lexend',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Professional dictionary for enhanced vocabulary',
+              style: TextStyle(
+                fontSize: 14,
+                color: textMuted,
+                fontWeight: FontWeight.w400,
+                fontFamily: 'Lexend',
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchField() {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: cardDark,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: borderDark,
+          width: 1,
+        ),
       ),
       child: TextField(
         controller: _searchController,
@@ -87,20 +217,26 @@ class _DictionaryScreenState extends State<DictionaryScreen>
             _searchAnimationController.reverse();
           }
         },
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        style: const TextStyle(
+          fontSize: 16, 
+          fontWeight: FontWeight.w400,
+          color: textPrimary,
+          fontFamily: 'Lexend',
+        ),
         decoration: InputDecoration(
-          hintText: 'Search for any word...',
-          hintStyle: TextStyle(
-            color: Colors.grey[500],
+          hintText: 'Search dictionary...',
+          hintStyle: const TextStyle(
+            color: textMuted,
             fontSize: 16,
             fontWeight: FontWeight.w400,
+            fontFamily: 'Lexend',
           ),
           prefixIcon: Container(
-            padding: const EdgeInsets.all(12),
-            child: Icon(
+            padding: const EdgeInsets.all(14),
+            child: const Icon(
               Icons.search_rounded,
-              color: const Color(0xFF00796B),
-              size: 24,
+              color: textSecondary,
+              size: 20,
             ),
           ),
           suffixIcon: AnimatedBuilder(
@@ -109,33 +245,38 @@ class _DictionaryScreenState extends State<DictionaryScreen>
               return Transform.scale(
                 scale: _searchAnimation.value,
                 child: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        onPressed: _clearSearch,
-                        icon: const Icon(
-                          Icons.clear_rounded,
-                          color: Colors.grey,
-                          size: 20,
+                    ? Container(
+                        margin: const EdgeInsets.all(8),
+                        child: IconButton(
+                          onPressed: _clearSearch,
+                          icon: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: textMuted.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.close_rounded,
+                              color: textMuted,
+                              size: 14,
+                            ),
+                          ),
                         ),
-                        tooltip: 'Clear search',
                       )
-                    : const SizedBox(),
+                    : const SizedBox(width: 48),
               );
             },
           ),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Colors.transparent,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.grey[200]!, width: 1),
-          ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFF00796B), width: 2),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: accentBlue, width: 1),
           ),
         ),
       ),
@@ -143,33 +284,27 @@ class _DictionaryScreenState extends State<DictionaryScreen>
   }
 
   Widget _buildWordCard(String word, int index, int totalCount) {
+    final vowelCount = word.split('').where((c) => 'aeiouAEIOU'.contains(c)).length;
+    final consonantCount = word.length - vowelCount;
+    
     return AnimatedContainer(
-      duration: Duration(milliseconds: 300 + (index * 50)),
-      curve: Curves.easeOutQuart,
+      duration: Duration(milliseconds: 200 + (index * 50)),
+      curve: Curves.easeOutCubic,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 20),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-          ],
+          color: cardDark,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: borderDark,
+            width: 1,
+          ),
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             onTap: () {
-              // Add haptic feedback
               HapticFeedback.lightImpact();
               _showWordDetails(word);
             },
@@ -181,23 +316,24 @@ class _DictionaryScreenState extends State<DictionaryScreen>
                   Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 44,
+                        height: 44,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [Color(0xFF00796B), Color(0xFF26A69A)],
+                          color: accentBlue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: accentBlue.withOpacity(0.3),
+                            width: 1,
                           ),
-                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Center(
                           child: Text(
                             word.substring(0, 1).toUpperCase(),
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: accentBlue,
                               fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Lexend',
                             ),
                           ),
                         ),
@@ -210,42 +346,102 @@ class _DictionaryScreenState extends State<DictionaryScreen>
                             Text(
                               word,
                               style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w600,
                                 fontSize: 18,
-                                color: Color(0xFF2E2E2E),
-                                letterSpacing: 0.5,
+                                color: textPrimary,
+                                fontFamily: 'Lexend',
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${word.length} letters',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey[600],
-                                fontWeight: FontWeight.w500,
-                              ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: accentBlue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: accentBlue.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '${word.length} chars',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: accentBlue,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Lexend',
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: accentOrange.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: accentOrange.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '$vowelCount vowels',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: accentOrange,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Lexend',
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
                       ),
-                      Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        color: Colors.grey[400],
-                        size: 16,
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: secondaryDark,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: borderDark,
+                            width: 1,
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_ios_rounded,
+                          color: textMuted,
+                          size: 14,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    _allWords[word]!,
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.grey[700],
-                      height: 1.4,
-                      fontWeight: FontWeight.w400,
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: secondaryDark,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: borderDark,
+                        width: 1,
+                      ),
                     ),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
+                    child: Text(
+                      _allWords[word]!,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: textSecondary,
+                        height: 1.4,
+                        fontWeight: FontWeight.w400,
+                        fontFamily: 'Lexend',
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ],
               ),
@@ -258,34 +454,33 @@ class _DictionaryScreenState extends State<DictionaryScreen>
 
   Widget _buildStatsCard(int totalWords, int filteredWords) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [Color(0xFF00796B), Color(0xFF26A69A)],
+        color: cardDark,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: borderDark,
+          width: 1,
         ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF00796B).withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
+              color: accentBlue.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: accentBlue.withOpacity(0.3),
+                width: 1,
+              ),
             ),
-            child: const Icon(
-              Icons.library_books_rounded,
-              color: Colors.white,
+            child: Icon(
+              _searchQuery.isEmpty 
+                  ? Icons.library_books_rounded 
+                  : Icons.search_rounded,
+              color: accentBlue,
               size: 24,
             ),
           ),
@@ -296,79 +491,127 @@ class _DictionaryScreenState extends State<DictionaryScreen>
               children: [
                 Text(
                   _searchQuery.isEmpty 
-                      ? 'Total Words' 
+                      ? 'Dictionary Database' 
                       : 'Search Results',
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
+                    color: textMuted,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
+                    fontFamily: 'Lexend',
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _searchQuery.isEmpty 
-                      ? '$totalWords words available' 
+                      ? '$totalWords entries available' 
                       : '$filteredWords results found',
                   style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    color: textPrimary,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Lexend',
                   ),
                 ),
               ],
             ),
           ),
+          if (_searchQuery.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: filteredWords > 0 
+                    ? accentGreen.withOpacity(0.1)
+                    : Colors.red.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: filteredWords > 0 
+                      ? accentGreen.withOpacity(0.3)
+                      : Colors.red.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                filteredWords > 0 
+                    ? Icons.check_circle_outline_rounded
+                    : Icons.error_outline_rounded,
+                color: filteredWords > 0 
+                    ? accentGreen
+                    : Colors.red,
+                size: 16,
+              ),
+            ),
         ],
       ),
     );
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return Container(
+      padding: const EdgeInsets.all(40),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 120,
-            height: 120,
+            width: 100,
+            height: 100,
             decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(60),
+              color: cardDark,
+              borderRadius: BorderRadius.circular(50),
+              border: Border.all(
+                color: borderDark,
+                width: 2,
+              ),
             ),
-            child: Icon(
+            child: const Icon(
               Icons.search_off_rounded,
-              size: 60,
-              color: Colors.grey[400],
+              size: 40,
+              color: textMuted,
             ),
           ),
           const SizedBox(height: 24),
-          Text(
+          const Text(
             'No results found',
             style: TextStyle(
               fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[600],
+              fontWeight: FontWeight.w600,
+              color: textPrimary,
+              fontFamily: 'Lexend',
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Try searching with different keywords',
+          const Text(
+            'Try different keywords or browse all entries',
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey[500],
+              fontSize: 14,
+              color: textMuted,
+              fontFamily: 'Lexend',
             ),
           ),
           const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _clearSearch,
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Clear Search'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF00796B),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          Container(
+            decoration: BoxDecoration(
+              color: accentBlue,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: ElevatedButton.icon(
+              onPressed: _clearSearch,
+              icon: const Icon(Icons.refresh_rounded, size: 18, color: Colors.white),
+              label: const Text(
+                'Clear Search',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                  fontFamily: 'Lexend',
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
           ),
@@ -378,39 +621,59 @@ class _DictionaryScreenState extends State<DictionaryScreen>
   }
 
   Widget _buildLoadingState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+    return Scaffold(
+      backgroundColor: primaryDark,
+      body: Column(
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: const Color(0xFF00796B).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(40),
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(
-                color: Color(0xFF00796B),
-                strokeWidth: 3,
+          _buildHeader(),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: cardDark,
+                      borderRadius: BorderRadius.circular(40),
+                      border: Border.all(
+                        color: borderDark,
+                        width: 1,
+                      ),
+                    ),
+                    child: const Center(
+                      child: SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: CircularProgressIndicator(
+                          color: accentBlue,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Loading Dictionary',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: textPrimary,
+                      fontFamily: 'Lexend',
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Preparing vocabulary database',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: textMuted,
+                      fontFamily: 'Lexend',
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ),
-          const SizedBox(height: 24),
-          const Text(
-            'Loading Dictionary...',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF2E2E2E),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Please wait while we prepare your words',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
             ),
           ),
         ],
@@ -419,29 +682,35 @@ class _DictionaryScreenState extends State<DictionaryScreen>
   }
 
   void _showWordDetails(String word) {
+    final vowelCount = word.split('').where((c) => 'aeiouAEIOU'.contains(c)).length;
+    final consonantCount = word.length - vowelCount;
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.7,
+        height: MediaQuery.of(context).size.height * 0.8,
         decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          color: cardDark,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border(
+            top: BorderSide(color: borderDark, width: 1),
+            left: BorderSide(color: borderDark, width: 1),
+            right: BorderSide(color: borderDark, width: 1),
+          ),
         ),
         child: Column(
           children: [
-            // Handle bar
             Container(
               margin: const EdgeInsets.only(top: 12),
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: textMuted,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            // Content
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(24),
@@ -454,25 +723,26 @@ class _DictionaryScreenState extends State<DictionaryScreen>
                           width: 60,
                           height: 60,
                           decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [Color(0xFF00796B), Color(0xFF26A69A)],
-                            ),
+                            color: accentBlue.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: accentBlue.withOpacity(0.3),
+                              width: 1,
+                            ),
                           ),
                           child: Center(
                             child: Text(
                               word.substring(0, 1).toUpperCase(),
                               style: const TextStyle(
-                                color: Colors.white,
+                                color: accentBlue,
                                 fontSize: 24,
-                                fontWeight: FontWeight.bold,
+                                fontWeight: FontWeight.w700,
+                                fontFamily: 'Lexend',
                               ),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 20),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,17 +751,77 @@ class _DictionaryScreenState extends State<DictionaryScreen>
                                 word,
                                 style: const TextStyle(
                                   fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF2E2E2E),
+                                  fontWeight: FontWeight.w700,
+                                  color: textPrimary,
+                                  fontFamily: 'Lexend',
                                 ),
                               ),
-                              Text(
-                                '${word.length} letters • ${word.split('').where((c) => 'aeiou'.contains(c.toLowerCase())).length} vowels',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 4,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: accentBlue.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: accentBlue.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '${word.length} letters',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: accentBlue,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Lexend',
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: accentOrange.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: accentOrange.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '$vowelCount vowels',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: accentOrange,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Lexend',
+                                      ),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: accentGreen.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: accentGreen.withOpacity(0.3),
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      '$consonantCount consonants',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: accentGreen,
+                                        fontWeight: FontWeight.w500,
+                                        fontFamily: 'Lexend',
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -499,46 +829,88 @@ class _DictionaryScreenState extends State<DictionaryScreen>
                       ],
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Definition',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF2E2E2E),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Text(
-                          _allWords[word]!,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[700],
-                            height: 1.6,
-                            fontWeight: FontWeight.w400,
-                          ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: accentBlue.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: accentBlue.withOpacity(0.3),
+                          width: 1,
                         ),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.article_outlined,
+                            color: accentBlue,
+                            size: 20,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Definition',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: accentBlue,
+                              fontFamily: 'Lexend',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00796B),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: secondaryDark,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: borderDark,
+                            width: 1,
                           ),
                         ),
-                        child: const Text(
-                          'Got it!',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
+                        child: SingleChildScrollView(
+                          child: Text(
+                            _allWords[word]!,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: textSecondary,
+                              height: 1.5,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'Lexend',
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: accentBlue,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: const Text(
+                            'Close',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              fontFamily: 'Lexend',
+                            ),
                           ),
                         ),
                       ),
@@ -556,12 +928,17 @@ class _DictionaryScreenState extends State<DictionaryScreen>
   @override
   void dispose() {
     _searchAnimationController.dispose();
+    _fadeAnimationController.dispose();
     _searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return _buildLoadingState();
+    }
+
     final filteredWords = _searchQuery.isEmpty
         ? _allWords.keys.toList()
         : _allWords.keys
@@ -570,48 +947,29 @@ class _DictionaryScreenState extends State<DictionaryScreen>
             .toList();
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Dictionary',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
-        backgroundColor: const Color(0xFF00796B),
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: _isLoading
-          ? _buildLoadingState()
-          : Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  // Search field
-                  _buildSearchField(),
-                  const SizedBox(height: 20),
-
-                  // Stats card
-                  _buildStatsCard(_allWords.length, filteredWords.length),
-
-                  // Results list
-                  Expanded(
-                    child: filteredWords.isEmpty
-                        ? _buildEmptyState()
-                        : ListView.builder(
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: filteredWords.length,
-                            itemBuilder: (context, index) {
-                              final word = filteredWords[index];
-                              return _buildWordCard(word, index, filteredWords.length);
-                            },
-                          ),
-                  ),
-                ],
-              ),
+      backgroundColor: primaryDark,
+      body: FadeTransition(
+        opacity: _fadeAnimation,
+        child: Column(
+          children: [
+            _buildHeader(),
+            _buildSearchField(),
+            _buildStatsCard(_allWords.length, filteredWords.length),
+            Expanded(
+              child: filteredWords.isEmpty
+                  ? _buildEmptyState()
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      itemCount: filteredWords.length,
+                      itemBuilder: (context, index) {
+                        final word = filteredWords[index];
+                        return _buildWordCard(word, index, filteredWords.length);
+                      },
+                    ),
             ),
+          ],
+        ),
+      ),
     );
   }
 }

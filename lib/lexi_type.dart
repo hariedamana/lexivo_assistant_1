@@ -1,695 +1,847 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class LexiTypeScreen extends StatefulWidget {
-  const LexiTypeScreen({super.key});
+class WordTypingScreen extends StatefulWidget {
+  const WordTypingScreen({super.key});
 
   @override
-  State<LexiTypeScreen> createState() => _LexiTypeScreenState();
+  State<WordTypingScreen> createState() => _WordTypingScreenState();
 }
 
-class _LexiTypeScreenState extends State<LexiTypeScreen>
+class _WordTypingScreenState extends State<WordTypingScreen>
     with TickerProviderStateMixin {
-  List<String> _wordsShort = [];
-  List<String> _wordsMedium = [];
-  List<String> _wordsLong = [];
-  List<String> _currentLevelWords = [];
-  int _currentWordIndex = 0;
-  String _currentWord = '';
-  String _userInput = '';
-  int _correctChars = 0;
-  int _totalChars = 0;
-  int _totalWordsTyped = 0;
-  Timer? _timer;
-  int _seconds = 0;
-  int _level = 1; // 1: Short, 2: Medium, 3: Long
-  double wpm = 0;
-  double accuracy = 0;
-  bool _isPaused = false;
-  bool _isGameStarted = false;
-  final TextEditingController _textController = TextEditingController();
-  final FocusNode _focusNode = FocusNode();
-  
-  // Animation controllers
-  late AnimationController _wordAnimationController;
-  late AnimationController _accuracyAnimationController;
-  late Animation<double> _wordScaleAnimation;
-  late Animation<Color?> _accuracyColorAnimation;
+  final List<String> words = [
+    'apple',
+    'ball',
+    'cat',
+    'dog',
+    'elephant',
+    'school',
+    'computer',
+    'friend',
+    'garden'
+  ];
+
+  final TextEditingController _controller = TextEditingController();
+  late AnimationController _slideController;
+  late AnimationController _bounceController;
+  late AnimationController _progressController;
+  late Animation<double> _slideAnimation;
+  late Animation<double> _bounceAnimation;
+  late Animation<double> _progressAnimation;
+
+  int currentIndex = 0;
+  int correctCount = 0;
+  int totalTyped = 0;
+  bool _showCorrect = false;
+  bool _showIncorrect = false;
+
+  DateTime? startTime;
+  bool _isLoading = false;
+  bool _isFinished = false;
+
+  // Professional Dark Theme Colors
+  static const Color primaryDark = Color(0xFF0D1117);
+  static const Color secondaryDark = Color(0xFF161B22);
+  static const Color cardDark = Color(0xFF21262D);
+  static const Color borderDark = Color(0xFF30363D);
+  static const Color accentBlue = Color(0xFF58A6FF);
+  static const Color accentGreen = Color(0xFF3FB950);
+  static const Color accentRed = Color(0xFFF85149);
+  static const Color textPrimary = Color(0xFFF0F6FC);
+  static const Color textSecondary = Color(0xFF8B949E);
+  static const Color textMuted = Color(0xFF656D76);
 
   @override
   void initState() {
     super.initState();
-    _initializeAnimations();
-    _loadWords();
-  }
-
-  void _initializeAnimations() {
-    _wordAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 300),
+    _slideController = AnimationController(
+      duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    _accuracyAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 500),
+    _bounceController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _progressController = AnimationController(
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
-    _wordScaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.1,
-    ).animate(CurvedAnimation(
-      parent: _wordAnimationController,
-      curve: Curves.elasticOut,
-    ));
-
-    _accuracyColorAnimation = ColorTween(
-      begin: Colors.grey,
-      end: Colors.green,
-    ).animate(_accuracyAnimationController);
-  }
-
-  Future<void> _loadWords() async {
-    try {
-      final String response = await rootBundle.loadString('assets/words.json');
-      final Map<String, dynamic> data = json.decode(response);
-
-      setState(() {
-        _wordsShort = data.keys
-            .where((w) => w.length <= 4)
-            .map((e) => e.toString())
-            .toList();
-        _wordsMedium = data.keys
-            .where((w) => w.length > 4 && w.length <= 7)
-            .map((e) => e.toString())
-            .toList();
-        _wordsLong = data.keys
-            .where((w) => w.length > 7)
-            .map((e) => e.toString())
-            .toList();
-      });
-
-      _setLevelWords();
-    } catch (e) {
-      // Fallback words if JSON loading fails
-      setState(() {
-        _wordsShort = ['cat', 'dog', 'run', 'jump', 'play', 'book', 'home', 'love'];
-        _wordsMedium = ['house', 'computer', 'flutter', 'coding', 'design', 'mobile'];
-        _wordsLong = ['programming', 'development', 'application', 'interface', 'technology'];
-      });
-      _setLevelWords();
-    }
-  }
-
-  void _setLevelWords() {
-    setState(() {
-      switch (_level) {
-        case 1:
-          _currentLevelWords = List.from(_wordsShort)..shuffle();
-          break;
-        case 2:
-          _currentLevelWords = List.from(_wordsMedium)..shuffle();
-          break;
-        case 3:
-          _currentLevelWords = List.from(_wordsLong)..shuffle();
-          break;
-      }
-      _currentWordIndex = 0;
-      _currentWord = _currentLevelWords.isNotEmpty ? _currentLevelWords[0] : '';
-      _resetStats();
-      _wordAnimationController.forward();
-    });
-  }
-
-  void _resetStats() {
-    _userInput = '';
-    _textController.clear();
-    _correctChars = 0;
-    _totalChars = 0;
-    _totalWordsTyped = 0;
-    _seconds = 0;
-    _isPaused = false;
-    _isGameStarted = false;
-    wpm = 0;
-    accuracy = 100;
-  }
-
-  void _startGame() {
-    if (!_isGameStarted) {
-      setState(() {
-        _isGameStarted = true;
-      });
-      _startTimer();
-    }
-    _focusNode.requestFocus();
-  }
-
-  void _startTimer() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!_isPaused) {
-        setState(() {
-          _seconds++;
-          _calculateStats();
-        });
-      }
-    });
-  }
-
-  void _pauseGame() {
-    setState(() {
-      _isPaused = !_isPaused;
-    });
-  }
-
-  void _restartLevel() {
-    _timer?.cancel();
-    _setLevelWords();
-    _focusNode.requestFocus();
-  }
-
-  void _calculateStats() {
-    final minutes = _seconds / 60;
-    if (minutes > 0) {
-      wpm = (_totalWordsTyped / minutes);
-      // Alternative WPM calculation: (_correctChars / 5) / minutes
-    } else {
-      wpm = 0;
-    }
-    accuracy = _totalChars > 0 ? (_correctChars / _totalChars) * 100 : 100;
-    
-    // Trigger accuracy color animation
-    if (accuracy >= 95) {
-      _accuracyAnimationController.forward();
-    } else {
-      _accuracyAnimationController.reverse();
-    }
-  }
-
-  void _onInputChanged(String value) {
-    if (!_isGameStarted) {
-      _startGame();
-    }
-
-    setState(() {
-      _userInput = value;
-      _totalChars = _userInput.length;
-      _correctChars = 0;
-      
-      // Calculate correct characters
-      for (int i = 0; i < _userInput.length && i < _currentWord.length; i++) {
-        if (_userInput[i].toLowerCase() == _currentWord[i].toLowerCase()) {
-          _correctChars++;
-        }
-      }
-
-      // Auto move to next word if correct
-      if (_userInput.trim().toLowerCase() == _currentWord.toLowerCase()) {
-        _nextWord();
-      }
-    });
-  }
-
-  void _nextWord() {
-    _totalWordsTyped++;
-    
-    if (_currentWordIndex < _currentLevelWords.length - 1) {
-      setState(() {
-        _currentWordIndex++;
-        _currentWord = _currentLevelWords[_currentWordIndex];
-        _userInput = '';
-        _textController.clear();
-      });
-      
-      // Animate word change
-      _wordAnimationController.reset();
-      _wordAnimationController.forward();
-      
-      // Haptic feedback
-      HapticFeedback.lightImpact();
-    } else {
-      _showLevelCompleteDialog();
-    }
-  }
-
-  void _showLevelCompleteDialog() {
-    _timer?.cancel();
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(Icons.celebration, color: Colors.amber, size: 28),
-            SizedBox(width: 8),
-            Text('Level $_level Completed!'),
-          ],
-        ),
-        content: Container(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildStatCard('Time', '$_seconds seconds', Icons.timer),
-              _buildStatCard('WPM', '${wpm.toStringAsFixed(1)}', Icons.speed),
-              _buildStatCard('Accuracy', '${accuracy.toStringAsFixed(1)}%', Icons.track_changes),
-              _buildStatCard('Words Typed', '$_totalWordsTyped', Icons.text_fields),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _restartLevel();
-            },
-            child: const Text('Retry Level'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (_level < 3) {
-                setState(() {
-                  _level++;
-                  _setLevelWords();
-                });
-              } else {
-                // Show completion dialog
-                _showGameCompleteDialog();
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Text(_level < 3 ? 'Next Level' : 'Complete Game'),
-          ),
-        ],
-      ),
+    _slideAnimation = Tween<double>(begin: 1.0, end: 0.0).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeInOut),
     );
-  }
-
-  void _showGameCompleteDialog() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Icon(Icons.emoji_events, color: Colors.amber, size: 32),
-            SizedBox(width: 8),
-            Text('Congratulations!'),
-          ],
-        ),
-        content: Text(
-          'You have completed all levels!\n\nWould you like to start over?',
-          style: TextStyle(fontSize: 16),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Stay Here'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                _level = 1;
-                _setLevelWords();
-              });
-            },
-            child: const Text('Start Over'),
-          ),
-        ],
-      ),
+    _bounceAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(parent: _bounceController, curve: Curves.elasticOut),
     );
-  }
-
-  Widget _buildStatCard(String label, String value, IconData icon) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 4),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey[300]!),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.deepPurple, size: 20),
-          SizedBox(width: 8),
-          Text(label, style: TextStyle(fontWeight: FontWeight.w500)),
-          Spacer(),
-          Text(value, style: TextStyle(fontWeight: FontWeight.bold)),
-        ],
-      ),
+    _progressAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _progressController, curve: Curves.easeInOut),
     );
-  }
 
-  Color _getInputBorderColor() {
-    if (_userInput.isEmpty) return Colors.grey[400]!;
-    
-    bool isCorrect = true;
-    for (int i = 0; i < _userInput.length && i < _currentWord.length; i++) {
-      if (_userInput[i].toLowerCase() != _currentWord[i].toLowerCase()) {
-        isCorrect = false;
-        break;
-      }
-    }
-    
-    return isCorrect ? Colors.green : Colors.red;
-  }
-
-  Widget _buildWordDisplay() {
-    return AnimatedBuilder(
-      animation: _wordScaleAnimation,
-      builder: (context, child) {
-        return Transform.scale(
-          scale: _wordScaleAnimation.value,
-          child: Container(
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.deepPurple.shade50,
-                  Colors.deepPurple.shade100,
-                ],
-              ),
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.deepPurple.withOpacity(0.2),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: _buildStyledWord(),
-                style: const TextStyle(
-                  fontSize: 42,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 6,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  List<TextSpan> _buildStyledWord() {
-    List<TextSpan> spans = [];
-    
-    for (int i = 0; i < _currentWord.length; i++) {
-      Color textColor;
-      Color backgroundColor = Colors.transparent;
-      
-      if (i < _userInput.length) {
-        if (_userInput[i].toLowerCase() == _currentWord[i].toLowerCase()) {
-          textColor = Colors.green;
-          backgroundColor = Colors.green.withOpacity(0.1);
-        } else {
-          textColor = Colors.red;
-          backgroundColor = Colors.red.withOpacity(0.1);
-        }
-      } else {
-        textColor = Colors.deepPurple;
-      }
-      
-      spans.add(TextSpan(
-        text: _currentWord[i].toUpperCase(),
-        style: TextStyle(
-          color: textColor,
-          backgroundColor: backgroundColor,
-        ),
-      ));
-    }
-    
-    return spans;
+    _slideController.forward();
+    _progressController.forward();
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _wordAnimationController.dispose();
-    _accuracyAnimationController.dispose();
-    _textController.dispose();
-    _focusNode.dispose();
+    _controller.dispose();
+    _slideController.dispose();
+    _bounceController.dispose();
+    _progressController.dispose();
     super.dispose();
+  }
+
+  double calculateWPM() {
+    if (startTime == null) return 0;
+    final duration = DateTime.now().difference(startTime!).inSeconds / 60;
+    return duration > 0 ? correctCount / duration : 0;
+  }
+
+  Future<void> saveProgress() async {
+    try {
+      setState(() => _isLoading = true);
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception("User not logged in");
+      }
+
+      await FirebaseFirestore.instance
+          .collection('progress')
+          .doc(user.uid)
+          .set({
+        'correctCount': correctCount,
+        'totalWords': words.length,
+        'accuracy': ((correctCount / words.length) * 100).toStringAsFixed(2),
+        'wpm': calculateWPM().toStringAsFixed(2),
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      setState(() => _isLoading = false);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.check_circle_outline, color: Colors.white),
+                SizedBox(width: 12),
+                Text("Progress saved successfully!", style: TextStyle(color: Colors.white)),
+              ],
+            ),
+            backgroundColor: accentGreen,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(child: Text("Error saving progress: $e", style: const TextStyle(color: Colors.white))),
+              ],
+            ),
+            backgroundColor: accentRed,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    }
+  }
+
+  void checkWord() {
+    if (startTime == null) {
+      startTime = DateTime.now();
+    }
+
+    final isCorrect = _controller.text.trim().toLowerCase() ==
+        words[currentIndex].toLowerCase();
+
+    setState(() {
+      totalTyped++;
+      if (isCorrect) {
+        correctCount++;
+        _showCorrect = true;
+        _bounceController.forward().then((_) {
+          _bounceController.reverse();
+          Future.delayed(const Duration(milliseconds: 800), () {
+            setState(() => _showCorrect = false);
+          });
+        });
+      } else {
+        _showIncorrect = true;
+        Future.delayed(const Duration(milliseconds: 800), () {
+          setState(() => _showIncorrect = false);
+        });
+      }
+
+      if (currentIndex < words.length - 1) {
+        Future.delayed(const Duration(milliseconds: 800), () {
+          _slideController.reset();
+          _slideController.forward();
+          setState(() {
+            currentIndex++;
+            _controller.clear();
+          });
+        });
+      } else {
+        Future.delayed(const Duration(milliseconds: 800), () {
+          setState(() {
+            _isFinished = true;
+          });
+          saveProgress();
+        });
+      }
+
+      if (!_isFinished && currentIndex < words.length - 1) {
+        _progressController.reset();
+        _progressController.forward();
+      }
+    });
+
+    if (!isCorrect) {
+      _controller.clear();
+    }
+  }
+
+  void resetGame() {
+    setState(() {
+      currentIndex = 0;
+      correctCount = 0;
+      totalTyped = 0;
+      startTime = null;
+      _isFinished = false;
+      _showCorrect = false;
+      _showIncorrect = false;
+      _controller.clear();
+    });
+    _slideController.reset();
+    _slideController.forward();
+    _progressController.reset();
+    _progressController.forward();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_currentLevelWords.isEmpty) {
-      return const Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: Colors.deepPurple),
-              SizedBox(height: 16),
-              Text('Loading words...', style: TextStyle(fontSize: 16)),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text('LexiType', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.deepPurple,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(_isPaused ? Icons.play_arrow : Icons.pause),
-            onPressed: _pauseGame,
-            tooltip: _isPaused ? 'Resume' : 'Pause',
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _restartLevel,
-            tooltip: 'Restart Level',
-          ),
-        ],
-      ),
+      backgroundColor: primaryDark,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              // Level indicator
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.deepPurple, Colors.deepPurple.shade300],
-                  ),
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: Text(
-                  'Level $_level - ${_level == 1 ? 'Short Words' : _level == 2 ? 'Medium Words' : 'Long Words'}',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
+        child: _isFinished ? _buildSummaryScreen() : _buildTypingScreen(),
+      ),
+    );
+  }
+
+  Widget _buildTypingScreen() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Professional Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cardDark,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderDark, width: 1),
               ),
-              
-              const SizedBox(height: 24),
-              
-              // Word display
-              _buildWordDisplay(),
-              
-              const SizedBox(height: 24),
-              
-              // Input field
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: TextField(
-                  controller: _textController,
-                  focusNode: _focusNode,
-                  autofocus: true,
-                  onChanged: _onInputChanged,
-                  style: const TextStyle(fontSize: 18, letterSpacing: 2),
-                  decoration: InputDecoration(
-                    hintText: _isGameStarted ? 'Type the word here...' : 'Start typing to begin!',
-                    hintStyle: TextStyle(color: Colors.grey[500]),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide.none,
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide(color: _getInputBorderColor(), width: 2),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                      borderSide: BorderSide(color: _getInputBorderColor(), width: 3),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: EdgeInsets.all(16),
-                  ),
-                ),
-              ),
-              
-              const SizedBox(height: 24),
-              
-              // Stats row
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(15),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildStatWidget('Time', '$_seconds s', Icons.timer, Colors.blue),
-                    Container(height: 40, width: 1, color: Colors.grey[300]),
-                    _buildStatWidget('WPM', '${wpm.toStringAsFixed(1)}', Icons.speed, Colors.orange),
-                    Container(height: 40, width: 1, color: Colors.grey[300]),
-                    AnimatedBuilder(
-                      animation: _accuracyColorAnimation,
-                      builder: (context, child) {
-                        return _buildStatWidget(
-                          'Accuracy', 
-                          '${accuracy.toStringAsFixed(1)}%', 
-                          Icons.track_changes, 
-                          _accuracyColorAnimation.value ?? Colors.green,
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // Progress indicator
-              Column(
+              child: Row(
                 children: [
                   Container(
-                    height: 12,
+                    padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
+                      color: accentBlue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: accentBlue.withOpacity(0.3)),
                     ),
-                    child: LinearProgressIndicator(
-                      value: (_currentWordIndex + 1) / _currentLevelWords.length,
-                      backgroundColor: Colors.grey[300],
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        Colors.deepPurple,
+                    child: const Icon(
+                      Icons.keyboard,
+                      color: accentBlue,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Typing Practice",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: textPrimary,
+                        ),
+                      ),
+                      Text(
+                        "Professional Training Module",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: textMuted,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: accentBlue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: accentBlue.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      "Session ${currentIndex + 1}",
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: accentBlue,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 32),
+
+            // Progress Section
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cardDark,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderDark, width: 1),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Word ${_currentWordIndex + 1} of ${_currentLevelWords.length}',
+                      const Text(
+                        "Progress",
                         style: TextStyle(
+                          color: textSecondary,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          color: Colors.grey[600],
                         ),
                       ),
                       Text(
-                        '${((_currentWordIndex + 1) / _currentLevelWords.length * 100).toStringAsFixed(0)}%',
-                        style: TextStyle(
+                        "${currentIndex + 1} of ${words.length}",
+                        style: const TextStyle(
+                          color: textPrimary,
                           fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepPurple,
+                          fontWeight: FontWeight.w600,
                         ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  AnimatedBuilder(
+                    animation: _progressAnimation,
+                    builder: (context, child) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: LinearProgressIndicator(
+                          value: (currentIndex / words.length) +
+                              (1 / words.length * _progressAnimation.value),
+                          backgroundColor: secondaryDark,
+                          valueColor: const AlwaysStoppedAnimation<Color>(accentBlue),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+            
+            const SizedBox(height: 40),
+
+            // Current Word Display
+            Center(
+              child: AnimatedBuilder(
+                animation: _slideAnimation,
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset: Offset(0, 30 * _slideAnimation.value),
+                    child: AnimatedBuilder(
+                      animation: _bounceAnimation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _bounceAnimation.value,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 40,
+                              vertical: 32,
+                            ),
+                            decoration: BoxDecoration(
+                              color: cardDark,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: borderDark, width: 1),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.3),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  "Type this word:",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color: textMuted,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  words[currentIndex],
+                                  style: const TextStyle(
+                                    fontSize: 42,
+                                    fontWeight: FontWeight.w700,
+                                    color: textPrimary,
+                                    letterSpacing: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            
+            const SizedBox(height: 32),
+
+            // Feedback Messages
+            SizedBox(
+              height: 40,
+              child: Center(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  child: _showCorrect
+                      ? Container(
+                          key: const ValueKey("correct"),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: accentGreen.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: accentGreen.withOpacity(0.3)),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.check_circle_outline, color: accentGreen, size: 18),
+                              SizedBox(width: 8),
+                              Text(
+                                "Correct!",
+                                style: TextStyle(
+                                  color: accentGreen,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : _showIncorrect
+                          ? Container(
+                              key: const ValueKey("incorrect"),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: accentRed.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: accentRed.withOpacity(0.3)),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.close, color: accentRed, size: 18),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    "Try again!",
+                                    style: TextStyle(
+                                      color: accentRed,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : const SizedBox(),
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 24),
+
+            // Typing Input
+            Container(
+              decoration: BoxDecoration(
+                color: cardDark,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderDark, width: 1),
+              ),
+              child: TextField(
+                controller: _controller,
+                textAlign: TextAlign.center,
+                autofocus: true,
+                onSubmitted: (_) => checkWord(),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.5,
+                  color: textPrimary,
+                ),
+                decoration: InputDecoration(
+                  hintText: "Enter your answer...",
+                  hintStyle: TextStyle(
+                    color: textMuted,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w400,
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  fillColor: Colors.transparent,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: accentBlue, width: 1),
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Submit Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: checkWord,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentBlue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  "Submit Answer",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Stats Grid
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cardDark,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderDark, width: 1),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Performance Metrics",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatItem("Correct", "$correctCount", Icons.check_circle_outline),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatItem("WPM", calculateWPM().toStringAsFixed(1), Icons.speed),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatItem("Accuracy", "${((correctCount / (totalTyped > 0 ? totalTyped : 1)) * 100).toStringAsFixed(1)}%", Icons.track_changes),
                       ),
                     ],
                   ),
                 ],
               ),
-              
-              if (_isPaused)
-                Container(
-                  margin: EdgeInsets.only(top: 20),
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade100,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: Colors.amber),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.pause_circle, color: Colors.amber.shade700),
-                      SizedBox(width: 8),
-                      Text(
-                        'Game Paused',
-                        style: TextStyle(
-                          color: Colors.amber.shade700,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStatWidget(String label, String value, IconData icon, Color color) {
-    return Column(
-      children: [
-        Icon(icon, color: color, size: 24),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: color,
+  Widget _buildStatItem(String label, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: secondaryDark,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: borderDark, width: 1),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: accentBlue,
+            size: 18,
           ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontWeight: FontWeight.w500,
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
+            ),
           ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: textMuted,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryScreen() {
+    final accuracy = ((correctCount / words.length) * 100).toStringAsFixed(1);
+    final wpm = calculateWPM().toStringAsFixed(1);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Success Icon
+            TweenAnimationBuilder(
+              duration: const Duration(milliseconds: 1000),
+              tween: Tween<double>(begin: 0, end: 1),
+              builder: (context, double value, child) {
+                return Transform.scale(
+                  scale: value,
+                  child: Container(
+                    padding: const EdgeInsets.all(32),
+                    decoration: BoxDecoration(
+                      color: accentGreen.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: accentGreen.withOpacity(0.3), width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.emoji_events_outlined,
+                      size: 64,
+                      color: accentGreen,
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              "Session Complete",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: textPrimary,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              "Excellent work! Your performance has been recorded.",
+              style: TextStyle(
+                fontSize: 14,
+                color: textSecondary,
+                fontWeight: FontWeight.w400,
+              ),
+              textAlign: TextAlign.center,
+            ),
+
+            const SizedBox(height: 40),
+
+            // Results Grid
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: cardDark,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: borderDark, width: 1),
+              ),
+              child: Column(
+                children: [
+                  const Text(
+                    "Final Results",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildSummaryCard("Words Completed", "$correctCount/${words.length}", Icons.text_fields),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildSummaryCard("Accuracy Rate", "$accuracy%", Icons.track_changes),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                      _buildSummaryCard("Typing Speed", "$wpm WPM", Icons.speed),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Action Buttons
+            if (_isLoading)
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(accentBlue),
+                strokeWidth: 2,
+              )
+            else
+              Column(
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: resetGame,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: accentBlue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        "Start New Session",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: textSecondary,
+                        side: const BorderSide(color: borderDark),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        "Back to Menu",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+          ],
         ),
-      ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(String title, String value, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: secondaryDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderDark, width: 1),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: accentBlue, size: 32),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: textPrimary,
+            ),
+          ),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              color: textMuted,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }

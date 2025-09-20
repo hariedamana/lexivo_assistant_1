@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:flutter/services.dart';
+import 'custom_circular_progress.dart';
 import 'dart:ui';
-import 'assistants_dashboard.dart';
-import 'chat_screen.dart';
+
+// Import actual screens
+import 'assistants_dashboard.dart'; // ✅ Real dashboard only
 import 'profile_screen.dart';
+import 'tts_service.dart';
+import 'lexi_type.dart';
+import 'simplify_assistant.dart';
+import 'correct_me.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,27 +18,57 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
   late PageController _pageController;
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
 
-  // New Brand Colors from LoginScreen
-  static const Color primaryTeal = Color(0xFF00796B);
-  static const Color secondaryBlue = Color(0xFF0288D1);
-  static const Color accentGreen = Color(0xFF43A047);
-  static const Color textColor = Color(0xFF1C1C2A);
-  static const Color lightBackground = Color(0xFFFAFAFA);
-  static const Color lightCard = Colors.white;
+  // Dyslexic-friendly settings
+  bool _isDarkMode = true;
+  double _textScale = 1.0;
+  bool _voiceEnabled = true;
+
+  // Professional Color Palette
+  static const Color primaryDark = Color(0xFF0F0F0F);
+  static const Color secondaryDark = Color(0xFF1A1A1A);
+  static const Color cardDark = Color(0xFF242424);
+  static const Color accentGreen = Color(0xFF00D4AA);
+  static const Color accentBlue = Color(0xFF3B82F6);
+  static const Color accentPurple = Color(0xFF8B5CF6);
+  static const Color accentOrange = Color(0xFFFA5252);
+  static const Color textPrimary = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFFB3B3B3);
+  static const Color textTertiary = Color(0xFF6B7280);
+  static const Color borderColor = Color(0xFF333333);
+
+  // Light theme colors
+  static const Color lightBackground = Color(0xFFF8FAFC);
+  static const Color lightCard = Color(0xFFFFFFFF);
+  static const Color lightText = Color(0xFF1F2937);
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _animationController,
+      curve: Curves.easeOutCubic,
+    ));
+    _animationController.forward();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -42,21 +78,21 @@ class _HomeScreenState extends State<HomeScreen> {
       _pageController.animateToPage(
         index,
         duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
+        curve: Curves.easeInOutCubic,
       );
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the bottom safe area padding
+    final topPadding = MediaQuery.of(context).padding.top;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Scaffold(
-      backgroundColor: lightBackground, // Changed background color
+      backgroundColor: _isDarkMode ? primaryDark : lightBackground,
       body: Stack(
         children: [
-          // Main content of the screen
+          // Main PageView with 3 tabs
           PageView(
             controller: _pageController,
             onPageChanged: (index) {
@@ -65,428 +101,368 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
             children: [
-              // Your existing home screen content
+              // 1. Main Home Content
               SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(20, 20, 20, 100 + bottomPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 20),
-                      // Header Section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Hey, Hari!',
-                                  style: TextStyle(
-                                    color: textColor, // Changed text color
-                                    fontSize: 32,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: -0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  DateTime.now().toString().substring(0, 10),
-                                  style: TextStyle(
-                                    color: textColor.withOpacity(0.6), // Changed text color
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: lightCard, // Changed background color
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                color: primaryTeal.withOpacity(0.2), // Changed border color
-                                width: 1,
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.notifications_outlined,
-                              color: primaryTeal, // Changed icon color
-                              size: 24,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 32),
-                      // Enhanced Search Bar
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                        decoration: BoxDecoration(
-                          color: lightCard, // Changed background color
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: primaryTeal.withOpacity(0.1), // Changed border color
-                            width: 1,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryTeal.withOpacity(0.05), // Changed shadow color
-                              offset: const Offset(0, 4),
-                              blurRadius: 20,
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.search_rounded, color: primaryTeal, size: 24), // Changed icon color
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: TextField(
-                                style: const TextStyle(
-                                  color: textColor, // Changed text color
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                decoration: InputDecoration(
-                                  hintText: "Start typing... I've got your back!",
-                                  hintStyle: TextStyle(
-                                    color: textColor.withOpacity(0.6), // Changed hint color
-                                    fontSize: 16,
-                                  ),
-                                  border: InputBorder.none,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 32),
-                      // Progress Card
-                      Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [
-                              primaryTeal, // Changed gradient colors
-                              secondaryBlue,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [
-                            BoxShadow(
-                              color: primaryTeal.withOpacity(0.3), // Changed shadow color
-                              offset: const Offset(0, 8),
-                              blurRadius: 32,
-                              spreadRadius: 0,
-                            ),
-                          ],
-                        ),
+                  padding: EdgeInsets.fromLTRB(20, topPadding + 20, 20, 120 + bottomPadding),
+                  child: AnimatedBuilder(
+                    animation: _fadeAnimation,
+                    builder: (context, child) {
+                      return Opacity(
+                        opacity: _fadeAnimation.value,
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Image.asset(
-                                    'assets/images/lexivo_bot.png',
-                                    height: 32,
-                                    width: 32,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        const Icon(Icons.android, color: Colors.white, size: 32),
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: const [
-                                      Text(
-                                        'Learning Progress',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w700,
-                                        ),
-                                      ),
-                                      SizedBox(height: 4),
-                                      Text(
-                                        'Keep it up!',
-                                        style: TextStyle(
-                                          color: Colors.white70,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Completed',
-                                      style: TextStyle(
-                                        color: Colors.white70,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      '75%',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                CircularPercentIndicator(
-                                  radius: 40.0,
-                                  lineWidth: 8.0,
-                                  percent: 0.75,
-                                  animation: true,
-                                  animationDuration: 1200,
-                                  center: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(
-                                      Icons.trending_up,
-                                      color: Colors.white,
-                                      size: 24,
-                                    ),
-                                  ),
-                                  progressColor: Colors.white,
-                                  backgroundColor: Colors.white.withOpacity(0.2),
-                                  circularStrokeCap: CircularStrokeCap.round,
-                                ),
-                              ],
-                            ),
+                            _buildProfessionalHeader(),
+                            const SizedBox(height: 24),
+                            _buildSearchAndQuickActions(),
+                            const SizedBox(height: 32),
+                            _buildProgressCard(),
+                            const SizedBox(height: 32),
+                            _buildToolsSection(),
+                            const SizedBox(height: 32),
+                            _buildRecentActivity(),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 40),
-                      // Assistants Section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Assistants',
-                            style: TextStyle(
-                              color: textColor, // Changed text color
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: primaryTeal.withOpacity(0.1), // Changed background color
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: primaryTeal.withOpacity(0.2),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      // Assistant Grid
-                      GridView.count(
-                        shrinkWrap: true,
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                        physics: const NeverScrollableScrollPhysics(),
-                        childAspectRatio: 0.85,
-                        children: const [
-                          FinancialAssistantTile(
-                            icon: Icons.record_voice_over_rounded,
-                            title: 'Text-to-Speech',
-                            subtitle: 'Voice Assistant',
-                            color: primaryTeal,
-                          ),
-                          FinancialAssistantTile(
-                            icon: Icons.tips_and_updates_rounded,
-                            title: 'Simplify',
-                            subtitle: 'Text Helper',
-                            color: secondaryBlue,
-                          ),
-                          FinancialAssistantTile(
-                            icon: Icons.keyboard_alt_rounded,
-                            title: 'LexiType',
-                            subtitle: 'Smart Typing',
-                            color: accentGreen,
-                          ),
-                          FinancialAssistantTile(
-                            icon: Icons.fact_check_outlined,
-                            title: 'Correct Me',
-                            subtitle: 'Grammar Check',
-                            color: primaryTeal, // Using a consistent primary color
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 40),
-                      // Recent Activities Section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Recent Activities',
-                            style: TextStyle(
-                              color: textColor, // Changed text color
-                              fontSize: 24,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          Icon(
-                            Icons.more_horiz,
-                            color: textColor.withOpacity(0.6), // Changed icon color
-                            size: 24,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      const FinancialRecentCard(
-                        icon: Icons.people_rounded,
-                        title: "In Progress",
-                        subtitle: "3 active sessions",
-                        amount: "Active",
-                        color: primaryTeal, // Changed color
-                      ),
-                      const SizedBox(height: 16),
-                      const FinancialRecentCard(
-                        icon: Icons.history_rounded,
-                        title: "Last Used",
-                        subtitle: "Text-to-Speech • 2 hours ago",
-                        amount: "2h ago",
-                        color: secondaryBlue, // Changed color
-                      ),
-                      const SizedBox(height: 16),
-                      const FinancialRecentCard(
-                        icon: Icons.lightbulb_outline_rounded,
-                        title: "Updated",
-                        subtitle: "New features available",
-                        amount: "New",
-                        color: accentGreen, // Changed color
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
+
+              // 2. Tools Tab
               const AssistantsDashboard(),
+
+              // 3. Profile Tab
               const ProfileScreen(),
             ],
           ),
 
-          // Custom Floating Navigation Bar positioned at the bottom
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: 16.0,
-                right: 16.0,
-                bottom: 20.0 + bottomPadding,
-              ),
-              child: CustomFloatingNavBar(
-                selectedIndex: _selectedIndex,
-                onItemSelected: _onItemTapped,
-                iconData: const [
-                  Icons.home_rounded,
-                  Icons.apps_rounded,
-                  Icons.person_rounded,
-                ],
-              ),
-            ),
+          // Bottom Navigation
+          Positioned(
+            bottom: 24 + bottomPadding,
+            left: 24,
+            right: 24,
+            child: _buildProfessionalNavigation(),
           ),
         ],
       ),
     );
   }
-}
 
-// -----------------------------------------------------------------------------
-// UI Helper Widgets
-// -----------------------------------------------------------------------------
+  // --------------------------
+  // Header Section
+  // --------------------------
+  Widget _buildProfessionalHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hello, Hari 👋',
+                style: TextStyle(
+                  color: _isDarkMode ? textPrimary : lightText,
+                  fontSize: 28 * _textScale,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                  fontFamily: 'Lexend',
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Ready to learn today?',
+                style: TextStyle(
+                  color: textSecondary,
+                  fontSize: 16 * _textScale,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Lexend',
+                ),
+              ),
+            ],
+          ),
+        ),
+        Row(
+          children: [
+            _buildHeaderButton(
+              Icons.accessibility_rounded,
+              onTap: _showAccessibilityPanel,
+            ),
+            const SizedBox(width: 12),
+            _buildHeaderButton(
+              Icons.notifications_none_rounded,
+              onTap: () {},
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
-class FinancialAssistantTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final Color color;
+  Widget _buildHeaderButton(IconData icon, {required VoidCallback onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: _isDarkMode ? cardDark : lightCard,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: borderColor.withOpacity(0.1)),
+        ),
+        child: Icon(
+          icon,
+          color: textSecondary,
+          size: 20,
+        ),
+      ),
+    );
+  }
 
-  const FinancialAssistantTile({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.color,
-  });
+  // --------------------------
+  // Search + Quick Actions
+  // --------------------------
+  Widget _buildSearchAndQuickActions() {
+    return Column(
+      children: [
+        // Search Bar
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          decoration: BoxDecoration(
+            color: _isDarkMode ? cardDark : lightCard,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: borderColor.withOpacity(0.1)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(_isDarkMode ? 0.2 : 0.05),
+                offset: const Offset(0, 2),
+                blurRadius: 8,
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.search_rounded,
+                color: textSecondary,
+                size: 20,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  style: TextStyle(
+                    color: _isDarkMode ? textPrimary : lightText,
+                    fontSize: 16 * _textScale,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: 'Lexend',
+                  ),
+                  decoration: InputDecoration(
+                    hintText: "Search tools, lessons, or ask me anything...",
+                    hintStyle: TextStyle(
+                      color: textSecondary,
+                      fontSize: 16 * _textScale,
+                      fontFamily: 'Lexend',
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: accentGreen.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  Icons.mic_rounded,
+                  color: accentGreen,
+                  size: 16,
+                ),
+              ),
+            ],
+          ),
+        ),
 
-  // Using the same color scheme as the main screen
-  static const Color lightCard = Colors.white;
-  static const Color textColor = Color(0xFF1C1C2A);
+        const SizedBox(height: 16),
 
-  @override
-  Widget build(BuildContext context) {
+        // Quick Actions
+        Row(
+          children: [
+            Expanded(
+              child: _buildQuickActionCard(
+                'Scan Text',
+                Icons.camera_alt_rounded,
+                accentBlue,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildQuickActionCard(
+                'Voice Mode',
+                Icons.record_voice_over_rounded,
+                accentPurple,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _buildQuickActionCard(
+                'Quick Type',
+                Icons.keyboard_rounded,
+                accentOrange,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickActionCard(String title, IconData icon, Color color) {
     return GestureDetector(
       onTap: () {
-        Widget targetPage;
-        switch (title) {
-          case 'Text-to-Speech':
-            targetPage = const TextToSpeechPage();
-            break;
-          case 'Simplify':
-            targetPage = const SimplifyPage();
-            break;
-          case 'LexiType':
-            targetPage = const LexiTypePage();
-            break;
-          case 'Correct Me':
-            targetPage = const CorrectMePage();
-            break;
-          default:
-            targetPage = const AssistantsPage();
-        }
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => targetPage),
-        );
+        HapticFeedback.lightImpact();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        decoration: BoxDecoration(
+          color: _isDarkMode ? cardDark : lightCard,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: borderColor.withOpacity(0.1)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(_isDarkMode ? 0.2 : 0.05),
+              offset: const Offset(0, 2),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 20,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: _isDarkMode ? textPrimary : lightText,
+                fontSize: 12 * _textScale,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Lexend',
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --------------------------
+  // Tools Section
+  // --------------------------
+  Widget _buildToolsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Your Tools',
+              style: TextStyle(
+                color: _isDarkMode ? textPrimary : lightText,
+                fontSize: 22 * _textScale,
+                fontWeight: FontWeight.w700,
+                fontFamily: 'Lexend',
+              ),
+            ),
+            Text(
+              'See all',
+              style: TextStyle(
+                color: accentGreen,
+                fontSize: 14 * _textScale,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Lexend',
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.1,
+          children: [
+            _buildToolCard(
+              'Text-to-Speech',
+              'Listen to any text',
+              Icons.record_voice_over_rounded,
+              accentBlue,
+              () => Navigator.push(context, MaterialPageRoute(builder: (context) => const TtsPage())),
+            ),
+            _buildToolCard(
+              'Simplify',
+              'Make text easier',
+              Icons.auto_fix_high_rounded,
+              accentPurple,
+              () => Navigator.push(context, MaterialPageRoute(builder: (context) => SimplifyAssistant())),
+            ),
+            _buildToolCard(
+              'LexiType',
+              'Smart typing help',
+              Icons.keyboard_rounded,
+              accentOrange,
+              () => Navigator.push(context, MaterialPageRoute(builder: (context) => const WordTypingScreen())),
+            ),
+            _buildToolCard(
+              'Grammar Check',
+              'Writing assistant',
+              Icons.fact_check_rounded,
+              accentGreen,
+              () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CorrectMePage())),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildToolCard(String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        onTap();
       },
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: lightCard, // Changed card background color
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: color.withOpacity(0.1),
-            width: 1,
-          ),
+          color: _isDarkMode ? cardDark : lightCard,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor.withOpacity(0.1)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withOpacity(_isDarkMode ? 0.2 : 0.05),
               offset: const Offset(0, 4),
-              blurRadius: 20,
+              blurRadius: 12,
             ),
           ],
         ),
@@ -494,415 +470,384 @@ class FinancialAssistantTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              width: 48,
+              height: 48,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    color.withOpacity(0.2),
-                    color.withOpacity(0.1),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(16),
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
                 icon,
                 color: color,
-                size: 28,
+                size: 24,
               ),
             ),
             const Spacer(),
             Text(
               title,
-              style: const TextStyle(
-                color: textColor, // Changed text color
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.3,
+              style: TextStyle(
+                color: _isDarkMode ? textPrimary : lightText,
+                fontSize: 16 * _textScale,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Lexend',
               ),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
               style: TextStyle(
-                color: textColor.withOpacity(0.6), // Changed text color
-                fontSize: 14,
+                color: textSecondary,
+                fontSize: 12 * _textScale,
                 fontWeight: FontWeight.w500,
+                fontFamily: 'Lexend',
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Active',
-                    style: TextStyle(
-                      color: color,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.arrow_forward_ios,
-                  color: color,
-                  size: 16,
-                ),
-              ],
             ),
           ],
         ),
       ),
     );
   }
-}
 
-class FinancialRecentCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final String amount;
-  final Color color;
-
-  const FinancialRecentCard({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.amount,
-    required this.color,
-  });
-
-  static const Color lightCard = Colors.white;
-  static const Color textColor = Color(0xFF1C1C2A);
-
-  @override
-  Widget build(BuildContext context) {
+  // --------------------------
+  // Bottom Navigation
+  // --------------------------
+  Widget _buildProfessionalNavigation() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      height: 64,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: lightCard, // Changed card background color
+        color: _isDarkMode ? cardDark.withOpacity(0.95) : lightCard.withOpacity(0.95),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: color.withOpacity(0.1),
-          width: 1,
-        ),
+        border: Border.all(color: borderColor.withOpacity(0.2)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            offset: const Offset(0, 2),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(_isDarkMode ? 0.3 : 0.1),
+            offset: const Offset(0, 8),
+            blurRadius: 24,
           ),
         ],
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  color.withOpacity(0.2),
-                  color.withOpacity(0.1),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
+          _buildNavItem(Icons.home_rounded, 'Home', 0),
+          _buildNavItem(Icons.dashboard_rounded, 'Tools', 1),
+          _buildNavItem(Icons.person_rounded, 'Profile', 2),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        _onItemTapped(index);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? accentGreen : Colors.transparent,
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
               icon,
-              color: color,
-              size: 24,
+              color: isSelected ? Colors.white : textSecondary,
+              size: 22,
             ),
+            if (isSelected) ...[
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14 * _textScale,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Lexend',
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --------------------------
+  // Accessibility Panel
+  // --------------------------
+  void _showAccessibilityPanel() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (context) => Container(
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: _isDarkMode ? cardDark : lightCard,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: borderColor.withOpacity(0.2)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: accentGreen.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.accessibility_rounded,
+                    color: accentGreen,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Accessibility',
+                  style: TextStyle(
+                    color: _isDarkMode ? textPrimary : lightText,
+                    fontSize: 20 * _textScale,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Lexend',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Text Size Slider
+            Text(
+              'Text Size',
+              style: TextStyle(
+                color: _isDarkMode ? textPrimary : lightText,
+                fontSize: 16 * _textScale,
+                fontWeight: FontWeight.w600,
+                                fontFamily: 'Lexend',
+              ),
+            ),
+            Slider(
+              value: _textScale,
+              min: 0.8,
+              max: 1.5,
+              divisions: 7,
+              activeColor: accentGreen,
+              onChanged: (value) {
+                setState(() {
+                  _textScale = value;
+                });
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // Dark Mode Toggle
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Dark Mode',
+                  style: TextStyle(
+                    color: _isDarkMode ? textPrimary : lightText,
+                    fontSize: 16 * _textScale,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Lexend',
+                  ),
+                ),
+                Switch(
+                  value: _isDarkMode,
+                  activeColor: accentGreen,
+                  onChanged: (value) {
+                    setState(() {
+                      _isDarkMode = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Voice Assistant Toggle
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Voice Assistance',
+                  style: TextStyle(
+                    color: _isDarkMode ? textPrimary : lightText,
+                    fontSize: 16 * _textScale,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Lexend',
+                  ),
+                ),
+                Switch(
+                  value: _voiceEnabled,
+                  activeColor: accentGreen,
+                  onChanged: (value) {
+                    setState(() {
+                      _voiceEnabled = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 32),
+
+            // Close Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: accentGreen,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'Close',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16 * _textScale,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Lexend',
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --------------------------
+  // Progress Card
+  // --------------------------
+  Widget _buildProgressCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: _isDarkMode ? cardDark : lightCard,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: borderColor.withOpacity(0.1)),
+      ),
+      child: Row(
+        children: [
+          CustomCircularProgress(
+            progress: 0.65,
+            size: 64,
+            color: accentGreen,
+            backgroundColor: borderColor.withOpacity(0.2),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
-                  style: const TextStyle(
-                    color: textColor, // Changed text color
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: -0.3,
+                  'Weekly Progress',
+                  style: TextStyle(
+                    color: _isDarkMode ? textPrimary : lightText,
+                    fontSize: 16 * _textScale,
+                    fontWeight: FontWeight.w700,
+                    fontFamily: 'Lexend',
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  subtitle,
+                  'You are 65% ahead of last week!',
                   style: TextStyle(
-                    color: textColor.withOpacity(0.6), // Changed text color
-                    fontSize: 14,
+                    color: textSecondary,
+                    fontSize: 12 * _textScale,
                     fontWeight: FontWeight.w500,
+                    fontFamily: 'Lexend',
                   ),
                 ),
               ],
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  amount,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Icon(
-                Icons.arrow_forward_ios,
-                color: color,
-                size: 16,
-              ),
-            ],
-          ),
         ],
       ),
     );
   }
-}
 
-// -----------------------------------------------------------------------------
-// Placeholder Pages
-// -----------------------------------------------------------------------------
-
-class TextToSpeechPage extends StatelessWidget {
-  const TextToSpeechPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const AssistantScaffold(
-      title: "Text-to-Speech",
-      message: "This is the Text-to-Speech Assistant.",
-    );
-  }
-}
-
-class SimplifyPage extends StatelessWidget {
-  const SimplifyPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const AssistantScaffold(
-      title: "Simplify",
-      message: "This is the Simplify Assistant.",
-    );
-  }
-}
-
-class LexiTypePage extends StatelessWidget {
-  const LexiTypePage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const AssistantScaffold(
-      title: "LexiType",
-      message: "This is the LexiType Assistant.",
-    );
-  }
-}
-
-class CorrectMePage extends StatelessWidget {
-  const CorrectMePage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const AssistantScaffold(
-      title: "Correct Me",
-      message: "This is the Correct Me Assistant.",
-    );
-  }
-}
-
-class AssistantsPage extends StatelessWidget {
-  const AssistantsPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const AssistantScaffold(
-      title: "Assistants",
-      message: "Welcome to Assistants Page!",
-    );
-  }
-}
-
-class ChatPage extends StatelessWidget {
-  const ChatPage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const AssistantScaffold(
-      title: "Chat",
-      message: "This is the Chat Page.",
-    );
-  }
-}
-
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const AssistantScaffold(
-      title: "Profile",
-      message: "This is the Profile Page.",
-    );
-  }
-}
-
-// Updated shared scaffold widget
-class AssistantScaffold extends StatelessWidget {
-  final String title;
-  final String message;
-
-  const AssistantScaffold({
-    super.key,
-    required this.title,
-    required this.message,
-  });
-
-  // Using the same color scheme as the main screen
-  static const Color lightBackground = Color(0xFFFAFAFA);
-  static const Color lightCard = Colors.white;
-  static const Color primaryTeal = Color(0xFF00796B);
-  static const Color textColor = Color(0xFF1C1C2A);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: lightBackground,
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: lightCard,
-        foregroundColor: primaryTeal,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: primaryTeal),
-        titleTextStyle: const TextStyle(
-          color: primaryTeal,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+  // --------------------------
+  // Recent Activity Section
+  // --------------------------
+  Widget _buildRecentActivity() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Recent Activity',
+          style: TextStyle(
+            color: _isDarkMode ? textPrimary : lightText,
+            fontSize: 22 * _textScale,
+            fontWeight: FontWeight.w700,
+            fontFamily: 'Lexend',
+          ),
         ),
-      ),
-      body: Center(
-        child: Text(
-          message,
-          style: const TextStyle(color: primaryTeal, fontSize: 18),
+        const SizedBox(height: 16),
+        Column(
+          children: [
+            _buildActivityItem('Simplified a text passage', '2h ago'),
+            _buildActivityItem('Generated speech from text', '5h ago'),
+            _buildActivityItem('Checked grammar mistakes', 'Yesterday'),
+          ],
         ),
-      ),
+      ],
     );
   }
-}
 
-// -----------------------------------------------------------------------------
-// Custom Navigation Bar
-// -----------------------------------------------------------------------------
-
-class CustomFloatingNavBar extends StatelessWidget {
-  final int selectedIndex;
-  final Function(int) onItemSelected;
-  final List<IconData> iconData;
-
-  const CustomFloatingNavBar({
-    super.key,
-    required this.selectedIndex,
-    required this.onItemSelected,
-    required this.iconData,
-  });
-
-  // Using the same color scheme as the main screen
-  static const Color primaryTeal = Color(0xFF00796B);
-  static const Color secondaryBlue = Color(0xFF0288D1);
-  static const Color accentGreen = Color(0xFF43A047);
-  static const Color textColor = Color(0xFF1C1C2A);
-  static const Color lightCard = Colors.white;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final buttonWidth = size.width / iconData.length;
-
-    return SizedBox(
-      height: 100,
-      child: Stack(
-        alignment: Alignment.bottomCenter,
+  Widget _buildActivityItem(String title, String time) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: _isDarkMode ? cardDark : lightCard,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor.withOpacity(0.1)),
+      ),
+      child: Row(
         children: [
-          Container(
-            height: 60,
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            decoration: BoxDecoration(
-              color: lightCard, // Changed background color
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  offset: const Offset(0, 4),
-                  blurRadius: 20,
-                ),
-              ],
+          Icon(
+            Icons.history_rounded,
+            color: accentGreen,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              title,
+              style: TextStyle(
+                color: _isDarkMode ? textPrimary : lightText,
+                fontSize: 14 * _textScale,
+                fontWeight: FontWeight.w500,
+                fontFamily: 'Lexend',
+              ),
             ),
           ),
-          AnimatedAlign(
-  duration: const Duration(milliseconds: 400),
-  curve: Curves.easeInOut,
-  alignment: Alignment(-1.0 + (2.0 / (iconData.length - 1)) * selectedIndex, 0.0),
-  child: Container(
-    height: 60,
-    width: 60,
-    decoration: BoxDecoration(
-      shape: BoxShape.circle,
-      gradient: const LinearGradient(
-        colors: [primaryTeal, secondaryBlue],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        ),
-      boxShadow: [
-          BoxShadow(
-          color: primaryTeal.withOpacity(0.5),
-          blurRadius: 15,
-          spreadRadius: 2,
-          ),
-        ],
-      ),
-        child: Icon(
-        iconData[selectedIndex],
-        color: Colors.white,
-        size: 28,
-      ),
-    ),
-  ),
-
-          SizedBox(
-            height: 80,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: List.generate(iconData.length, (index) {
-                return GestureDetector(
-                  onTap: () => onItemSelected(index),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    child: Opacity(
-                      opacity: selectedIndex == index ? 0 : 1, // Hide the icon inside the bubble
-                      child: Icon(
-                        iconData[index],
-                        color: textColor.withOpacity(0.6), // Changed icon color
-                        size: 26,
-                      ),
-                    ),
-                  ),
-                );
-              }),
+          Text(
+            time,
+            style: TextStyle(
+              color: textSecondary,
+              fontSize: 12 * _textScale,
+              fontFamily: 'Lexend',
             ),
           ),
         ],

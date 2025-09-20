@@ -6,13 +6,15 @@ import 'splash_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import 'home_screen.dart';
-import 'assistants_dashboard.dart';
-import 'chat_screen.dart';
-import 'profile_screen.dart';
+import 'assistants_dashboard.dart' as dashboard;
+import 'profile_screen.dart' as profile;
+import 'admin_dashboard.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform,);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const LexivoApp());
 }
 
@@ -30,8 +32,9 @@ class LexivoApp extends StatelessWidget {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),
         '/home': (context) => const HomeScreen(),
-        '/assistants': (context) => AssistantsDashboard(),
-        '/profile': (context) => const ProfileScreen(), // <-- Chatbot route
+        '/assistants': (context) => dashboard.AssistantsDashboard(),
+        '/profile': (context) => const profile.ProfileScreen(),
+        '/adminHome': (context) => const ProfessionalAdminDashboard(), // <-- Added here
       },
     );
   }
